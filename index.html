@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>Trình Đọc Truyện - iOS Cốc Cốc Optimized</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #121214;
+      --sidebar-bg: #18181b;
+      --card-bg: #27272a;
+      --text-1: #e2e8f0;
+      --text-2: #94a3b8;
+      --dialogue-color: #fde047;
+      --chapter-color: #fbbf24;
+      --accent: #6366f1;
+      --bookmark-border: #38bdf8;
+      --border-color: #3f3f46;
+      --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-size: 18px;
+      --line-height: 1.8;
+      --content-width: 780px;
+      --column-count: 1;
+      --meta-bg: rgba(18, 18, 20, 0.9);
+    }
+
+    body.theme-sepia {
+      --bg-color: #f4ecd8;
+      --sidebar-bg: #eae0c8;
+      --card-bg: #dfd4b8;
+      --text-1: #433422;
+      --text-2: #67523b;
+      --dialogue-color: #92400e;
+      --chapter-color: #b45309;
+      --accent: #b45309;
+      --bookmark-border: #d97706;
+      --border-color: #cbbe9f;
+      --meta-bg: rgba(244, 236, 216, 0.92);
+    }
+
+    body.theme-oled {
+      --bg-color: #000000;
+      --sidebar-bg: #09090b;
+      --card-bg: #18181b;
+      --text-1: #fafafa;
+      --text-2: #a1a1aa;
+      --dialogue-color: #fef08a;
+      --chapter-color: #facc15;
+      --accent: #818cf8;
+      --bookmark-border: #0ea5e9;
+      --border-color: #27272a;
+      --meta-bg: rgba(0, 0, 0, 0.95);
+    }
+
+    body.theme-forest {
+      --bg-color: #0c1815;
+      --sidebar-bg: #132420;
+      --card-bg: #1a332d;
+      --text-1: #dcfce7;
+      --text-2: #86efac;
+      --dialogue-color: #fef08a;
+      --chapter-color: #4ade80;
+      --accent: #10b981;
+      --bookmark-border: #34d399;
+      --border-color: #224b40;
+      --meta-bg: rgba(12, 24, 21, 0.92);
+    }
+
+    * {
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+      -webkit-tap-highlight-color: transparent; /* Bỏ viền xám mặc định khi chạm trên iOS */
+      touch-action: manipulation; /* Tắt delay 300ms và chặn double-tap zoom lỗi */
+    }
+
+    body {
+      background-color: var(--bg-color);
+      margin: 0;
+      /* Padding hỗ trợ tai thỏ và thanh Home Bar của iPhone */
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 60px);
+      padding-left: calc(env(safe-area-inset-left, 0px) + 14px);
+      padding-right: calc(env(safe-area-inset-right, 0px) + 14px);
+      font-family: var(--font-family);
+      display: flex;
+      justify-content: center;
+      transition: background 0.25s ease, color 0.25s ease;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #progress-container {
+      position: fixed;
+      top: env(safe-area-inset-top, 0px);
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: transparent;
+      z-index: 1100;
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), #ec4899);
+      transition: width 0.1s;
+    }
+
+    /* Thanh thông số nổi cố định */
+    .reading-meta-sticky {
+      position: sticky;
+      top: env(safe-area-inset-top, 0px);
+      width: 100%;
+      background: var(--meta-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+      margin-bottom: 18px;
+      font-size: 12px;
+      color: var(--text-2);
+      z-index: 900;
+      border-radius: 0 0 10px 10px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: var(--content-width);
+      position: relative;
+    }
+
+    .input-wrapper {
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .input-wrapper.hidden {
+      display: none;
+    }
+
+    textarea {
+      width: 100%;
+      height: 140px;
+      background: var(--card-bg);
+      color: var(--text-1);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 16px; /* Ngăn iOS Safari tự zoom màn hình khi bấm vào ô nhập */
+      line-height: 1.5;
+      resize: vertical;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      color: var(--text-2);
+      font-size: 13px;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+
+    #reader-content {
+      line-height: var(--line-height);
+      font-size: var(--font-size);
+      text-align: justify;
+      word-break: break-word;
+      column-count: var(--column-count);
+      column-gap: 32px;
+    }
+
+    .para {
+      margin-bottom: 1.1em;
+      text-indent: 1.6em;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 6px;
+      transition: opacity 0.25s, background 0.2s;
+      border-left: 3px solid transparent;
+      break-inside: avoid;
+      position: relative;
+    }
+
+    .para:nth-child(odd) { color: var(--text-1); }
+    .para:nth-child(even) { color: var(--text-2); }
+
+    .dialogue {
+      color: var(--dialogue-color) !important;
+      font-weight: 500;
+    }
+
+    .bionic-bold {
+      font-weight: 700;
+    }
+
+    body.spotlight-on .para {
+      opacity: 0.25;
+    }
+    body.spotlight-on .para.bookmarked,
+    body.spotlight-on .para:hover {
+      opacity: 1;
+    }
+
+    .para.bookmarked {
+      border-left: 4px solid var(--bookmark-border) !important;
+      background: rgba(56, 189, 248, 0.08) !important;
+    }
+
+    .exact-marker {
+      display: inline-block;
+      margin: 0 4px;
+      font-size: 1em;
+      line-height: 1;
+      user-select: none;
+      vertical-align: baseline;
+      animation: bounce 1.8s infinite ease-in-out;
+      filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.8));
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    .para.speaking {
+      border-left: 4px solid #a855f7 !important;
+      background: rgba(168, 85, 247, 0.15) !important;
+    }
+
+    .chapter-heading {
+      font-size: 1.35em;
+      font-weight: 700;
+      color: var(--chapter-color) !important;
+      text-align: center;
+      margin: 36px 0 20px 0;
+      text-indent: 0;
+      scroll-margin-top: 50px;
+      column-span: all;
+    }
+
+    /* Sidebars: Sửa 100vh thành 100dvh để chuẩn thanh URL động trên iOS */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      width: min(85vw, 320px);
+      height: 100dvh;
+      background: var(--sidebar-bg);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 0 24px rgba(0,0,0,0.6);
+      z-index: 1300;
+      transition: transform 0.28s ease;
+      display: flex;
+      flex-direction: column;
+      padding: max(16px, env(safe-area-inset-top)) 18px max(16px, env(safe-area-inset-bottom)) 18px;
+    }
+
+    #sidebar-history { left: 0; transform: translateX(-100%); }
+    #sidebar-history.open { transform: translateX(0); }
+
+    #drawer-settings { right: 0; transform: translateX(100%); }
+    #drawer-settings.open { transform: translateX(0); }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      color: var(--accent);
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .sidebar-close {
+      background: none;
+      border: none;
+      color: var(--text-2);
+      font-size: 22px;
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .list-container {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch; /* Cuộn mượt quán tính iOS */
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .list-item {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      font-size: 14px;
+      color: var(--text-1);
+    }
+
+    .setting-group { margin-bottom: 16px; }
+    .setting-title {
+      font-size: 12px;
+      color: var(--text-2);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-row { display: flex; gap: 8px; }
+
+    .setting-btn {
+      flex: 1;
+      min-height: 40px; /* Chuẩn cảm ứng iOS */
+      padding: 6px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-1);
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .setting-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100dvh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1500;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal-content {
+      background: var(--sidebar-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80dvh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px;
+      color: var(--text-1);
+    }
+
+    .modal-content h3 { color: var(--accent); margin-top: 0; font-size: 16px; }
+    .guide-section { margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+    .guide-section h4 { margin: 6px 0; color: var(--chapter-color); font-size: 14px; }
+    .guide-section ul { margin: 4px 0; padding-left: 18px; font-size: 13px; line-height: 1.5; color: var(--text-2); }
+    .guide-key {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--text-1);
+    }
+
+    /* Nhóm nút bấm nổi: Cố định theo thanh vuốt iPhone */
+    .fab-group-left {
+      position: fixed;
+      bottom: calc(env(safe-area-inset-bottom, 14px) + 10px);
+      left: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+
+    .fab-group-right {
+      position: fixed;
+      bottom: calc(env(safe-area-inset-bottom, 14px) + 10px);
+      right: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+
+    .fab {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--card-bg);
+      color: var(--text-1);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    }
+
+    .fab.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+  </style>
+</head>
+<body class="theme-dark">
+
+  <div id="progress-container"><div id="progress-bar"></div></div>
+
+  <!-- Modal Hướng Dẫn -->
+  <div class="modal-overlay" id="guideModal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3>📖 Hướng Dẫn Nhanh (iPhone)</h3>
+        <button class="sidebar-close" id="btnCloseGuide">✕</button>
+      </div>
+
+      <div class="guide-section">
+        <h4>1. Đánh dấu vị trí đọc</h4>
+        <ul>
+          <li><strong>Chạm nhẹ vào từ</strong> bất kỳ để ghim <span class="guide-key">📌</span> vào cuối từ đó (không xé đôi từ).</li>
+          <li><strong>Chạm lại</strong> vào đoạn đang có ghim để hủy đánh dấu.</li>
+        </ul>
+      </div>
+
+      <div class="guide-section">
+        <h4>2. Nghe đọc Audio (TTS)</h4>
+        <ul>
+          <li>Chạm <span class="guide-key">🎧</span> để phát giọng tiếng Việt có sẵn của iOS.</li>
+          <li>Chạm lại <span class="guide-key">🎧</span> lần nữa để tắt hẳn.</li>
+        </ul>
+      </div>
+
+      <div class="guide-section">
+        <h4>3. Tự cuộn rảnh tay</h4>
+        <ul>
+          <li>Bấm nút <span class="guide-key">▶</span> để màn hình tự lướt trôi từ từ.</li>
+        </ul>
+      </div>
+
+      <button class="setting-btn" style="width: 100%; margin-top: 10px;" id="btnOkGuide">Đã hiểu</button>
+    </div>
+  </div>
+
+  <!-- Sidebar: Điều Hướng -->
+  <div class="sidebar" id="sidebar-history">
+    <div class="sidebar-header">
+      <span>📚 Điều Hướng</span>
+      <button class="sidebar-close" id="btnCloseHistory">✕</button>
+    </div>
+    <div class="setting-title">Mục lục chương</div>
+    <ul class="list-container" id="tocList" style="max-height: 35dvh; margin-bottom: 14px;"></ul>
+    <div class="setting-title">Lịch sử văn bản</div>
+    <ul class="list-container" id="historyList"></ul>
+  </div>
+
+  <!-- Drawer: Cài Đặt -->
+  <div class="sidebar" id="drawer-settings">
+    <div class="sidebar-header">
+      <span>⚙️ Tùy Chỉnh Đọc</span>
+      <button class="sidebar-close" id="btnCloseSettings">✕</button>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-title">Giao diện (Themes)</div>
+      <div class="btn-row" style="margin-bottom: 6px;">
+        <button class="setting-btn" onclick="setTheme('theme-dark')">Tối</button>
+        <button class="setting-btn" onclick="setTheme('theme-sepia')">Sepia</button>
+      </div>
+      <div class="btn-row">
+        <button class="setting-btn" onclick="setTheme('theme-oled')">OLED</button>
+        <button class="setting-btn" onclick="setTheme('theme-forest')">Rừng Đêm</button>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-title">Phông chữ & Bố cục</div>
+      <div class="btn-row" style="margin-bottom: 6px;">
+        <button class="setting-btn" onclick="setFont('sans')">Hiện đại</button>
+        <button class="setting-btn" onclick="setFont('serif')">Sách giấy</button>
+      </div>
+      <div class="btn-row" style="margin-bottom: 6px;">
+        <button class="setting-btn" id="btnColumns" onclick="toggleColumns()">📖 2 Cột: Tắt</button>
+        <button class="setting-btn" id="btnBionic" onclick="toggleBionic()">⚡ Bionic: Tắt</button>
+      </div>
+      <button class="setting-btn" style="width: 100%;" id="btnSpotlight" onclick="toggleSpotlight()">💡 Đèn Rọi: Tắt</button>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-title">Cỡ chữ & Khổ rộng</div>
+      <div class="btn-row" style="margin-bottom: 6px;">
+        <button class="setting-btn" onclick="adjustFontSize(-1)">A -</button>
+        <button class="setting-btn" onclick="adjustFontSize(1)">A +</button>
+      </div>
+      <div class="btn-row">
+        <button class="setting-btn" onclick="setContentWidth('100%')">Vừa màn</button>
+        <button class="setting-btn" onclick="setContentWidth('780px')">Chuẩn</button>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-title">Đổi tên nhân vật (Từ cũ = Từ mới)</div>
+      <textarea id="replaceRules" style="height: 60px; font-size: 14px;" placeholder="hắn ta = anh&#10;tiểu tử = cậu ấy"></textarea>
+      <div class="btn-row" style="margin-top: 6px;">
+        <button class="setting-btn" id="btnUnbreak" onclick="toggleUnbreak()">Vá dòng: Tắt</button>
+        <button class="setting-btn" onclick="applyTextRules()">Áp dụng</button>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-title">Tốc độ cuộn rảnh tay</div>
+      <input type="range" id="scrollSpeed" min="1" max="10" value="2" style="width: 100%; height: 28px;">
+    </div>
+  </div>
+
+  <!-- Nút góc trái -->
+  <div class="fab-group-left">
+    <button class="fab" id="btnOpenGuide" title="Hướng dẫn">❓</button>
+    <button class="fab" id="btnToggleHistory" title="Mục lục & Lịch sử">📚</button>
+    <button class="fab" id="btnToggleInput" title="Dán truyện">✏️</button>
+  </div>
+
+  <!-- Nút góc phải -->
+  <div class="fab-group-right">
+    <button class="fab" id="btnTTS" title="Đọc giọng nói">🎧</button>
+    <button class="fab" id="btnToggleSettings" title="Cài đặt">⚙️</button>
+    <button class="fab" id="btnAutoScroll" title="Cuộn trang">▶</button>
+    <button class="fab" id="btnScrollTop" title="Lên đỉnh">▲</button>
+  </div>
+
+  <div class="container">
+    <div class="reading-meta-sticky" id="readingMeta">
+      <span id="wordCount">0 từ</span>
+      <span id="progressPercent">0%</span>
+    </div>
+
+    <div class="input-wrapper" id="inputWrapper">
+      <textarea id="textInput" placeholder="Dán văn bản truyện vào đây..."></textarea>
+      <div class="drop-zone" id="dropZone">📁 Chạm để chọn tệp .txt từ máy</div>
+      <input type="file" id="fileInput" accept=".txt,text/plain" style="display: none;">
+    </div>
+
+    <div id="reader-content"></div>
+  </div>
+
+  <script>
+    const textInput = document.getElementById('textInput');
+    const inputWrapper = document.getElementById('inputWrapper');
+    const readerContent = document.getElementById('reader-content');
+    const progressBar = document.getElementById('progress-bar');
+    const readingMeta = document.getElementById('readingMeta');
+    const wordCountSpan = document.getElementById('wordCount');
+    const progressPercentSpan = document.getElementById('progressPercent');
+    const tocList = document.getElementById('tocList');
+    const historyList = document.getElementById('historyList');
+    const btnAutoScroll = document.getElementById('btnAutoScroll');
+    const btnTTS = document.getElementById('btnTTS');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const replaceRulesInput = document.getElementById('replaceRules');
+    const scrollSpeedInput = document.getElementById('scrollSpeed');
+
+    let isAutoScrolling = false;
+    let autoScrollTimer = null;
+    let synth = window.speechSynthesis;
+    let ttsActive = false;
+    let currentParaIdx = 0;
+    let enableBionic = false;
+    let enableUnbreak = false;
+    let isTwoColumn = false;
+
+    const isChapter = (text) => /^(chương|hồi|quyển|tiết|thứ)\s+[0-9ivxlcdm]+/i.test(text.trim()) || /^chương\s+/i.test(text.trim());
+
+    const formatDialogue = (text) => {
+      return text
+        .replace(/(".*?"|“.*?”|「.*?」)/g, '<span class="dialogue">$1</span>')
+        .replace(/^(-\s.*)/g, '<span class="dialogue">$1</span>');
+    };
+
+    const applyBionic = (text) => {
+      if (!enableBionic) return text;
+      return text.replace(/([a-zA-ZÀ-ỹ0-9]+)/g, (match) => {
+        const mid = Math.ceil(match.length / 2);
+        return `<span class="bionic-bold">${match.slice(0, mid)}</span>${match.slice(mid)}`;
+      });
+    };
+
+    const applyWordReplacements = (text) => {
+      const rawRules = replaceRulesInput.value.trim();
+      if (!rawRules) return text;
+      let replaced = text;
+      const lines = rawRules.split('\n');
+      lines.forEach(line => {
+        const parts = line.split('=');
+        if (parts.length === 2) {
+          const from = parts[0].trim();
+          const to = parts[1].trim();
+          if (from) {
+            replaced = replaced.replaceAll(new RegExp(from, 'gi'), to);
+          }
+        }
+      });
+      return replaced;
+    };
+
+    const smartUnbreakText = (text) => {
+      if (!enableUnbreak) return text;
+      const rawLines = text.split('\n');
+      let merged = '';
+      for (let i = 0; i < rawLines.length; i++) {
+        let cur = rawLines[i].trim();
+        if (!cur) continue;
+        merged += cur;
+        if (!/[.!?…”"']$/.test(cur) && !isChapter(cur)) {
+          merged += ' ';
+        } else {
+          merged += '\n\n';
+        }
+      }
+      return merged;
+    };
+
+    const cleanText = (raw) => {
+      return raw.replace(/nguồn\s*:\s*[^\n]+/gi, '')
+                .replace(/truyện\s*được\s*đăng\s*tại[^\n]+/gi, '')
+                .replace(/chúc\s*bạn\s*đọc\s*truyện\s*vui\s*vẻ[^\n]*/gi, '');
+    };
+
+    const processContent = (isFromHistory = false) => {
+      let text = cleanText(textInput.value);
+      text = smartUnbreakText(text);
+      text = applyWordReplacements(text);
+
+      if (!text.trim()) {
+        readerContent.innerHTML = '';
+        readingMeta.style.display = 'none';
+        return;
+      }
+
+      const lines = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+      let totalWords = 0;
+      let chapterCount = 0;
+      tocList.innerHTML = '';
+
+      let firstTitle = '';
+      let paraCount = 0;
+
+      const html = lines.map((line) => {
+        totalWords += line.split(/\s+/).length;
+        if (isChapter(line)) {
+          if (!firstTitle) firstTitle = line;
+          chapterCount++;
+          const cId = `chap-${chapterCount}`;
+          
+          const li = document.createElement('li');
+          li.className = 'list-item';
+          li.innerText = line;
+          li.onclick = () => {
+            document.getElementById(cId).scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('sidebar-history').classList.remove('open');
+          };
+          tocList.appendChild(li);
+
+          return `<div id="${cId}" class="chapter-heading">${line}</div>`;
+        }
+        const idx = paraCount++;
+        let formatted = formatDialogue(line);
+        if (enableBionic) formatted = applyBionic(formatted);
+        return `<p class="para" data-index="${idx}">${formatted}</p>`;
+      }).join('');
+
+      readerContent.innerHTML = html;
+      readingMeta.style.display = 'flex';
+      
+      const minutes = Math.ceil(totalWords / 220);
+      wordCountSpan.innerText = `${totalWords.toLocaleString()} từ (~${minutes}p)`;
+
+      localStorage.setItem('saved_reader_text', textInput.value);
+      if (!isFromHistory) saveHistory(firstTitle || lines[0].substring(0, 30), textInput.value);
+
+      restoreSavedBookmark();
+    };
+
+    const isWordChar = (char) => /[a-zA-Z0-9À-ỹ_]/.test(char);
+
+    const findWordEndOffset = (text, offset) => {
+      let end = offset;
+      while (end < text.length && isWordChar(text[end])) {
+        end++;
+      }
+      return end;
+    };
+
+    // Tối ưu hóa xử lý chạm vị trí (Touch) trên WebKit iOS
+    readerContent.addEventListener('click', (e) => {
+      const para = e.target.closest('.para');
+      if (!para) return;
+
+      const index = parseInt(para.dataset.index, 10);
+
+      if (para.classList.contains('bookmarked')) {
+        clearBookmark();
+        return;
+      }
+
+      clearBookmarkUI();
+
+      let targetNode = null;
+      let targetOffset = 0;
+
+      // Ưu tiên WebKit caretRangeFromPoint chuẩn của iOS
+      if (document.caretRangeFromPoint) {
+        const range = document.caretRangeFromPoint(e.clientX, e.clientY);
+        if (range) {
+          targetNode = range.startContainer;
+          targetOffset = range.startOffset;
+        }
+      } else if (document.caretPositionFromPoint) {
+        const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+        if (pos) {
+          targetNode = pos.offsetNode;
+          targetOffset = pos.offset;
+        }
+      }
+
+      const marker = document.createElement('span');
+      marker.className = 'exact-marker';
+      marker.innerText = '📌';
+
+      let charOffset = 0;
+
+      if (targetNode && targetNode.nodeType === Node.TEXT_NODE && para.contains(targetNode)) {
+        const textVal = targetNode.nodeValue;
+        const finalOffset = findWordEndOffset(textVal, targetOffset);
+
+        const parent = targetNode.parentNode;
+        if (finalOffset < textVal.length) {
+          const afterText = targetNode.splitText(finalOffset);
+          parent.insertBefore(marker, afterText);
+        } else {
+          parent.insertBefore(marker, targetNode.nextSibling);
+        }
+        charOffset = getCharacterOffsetWithin(marker, para);
+      } else {
+        para.appendChild(marker);
+        charOffset = para.textContent.length;
+      }
+
+      para.classList.add('bookmarked');
+      currentParaIdx = index;
+
+      localStorage.setItem('saved_bookmark_data', JSON.stringify({ index, charOffset }));
+    });
+
+    const getCharacterOffsetWithin = (node, root) => {
+      let offset = 0;
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+      let currentNode;
+      while ((currentNode = walker.nextNode())) {
+        if (currentNode === node || node.contains(currentNode)) break;
+        offset += currentNode.textContent.length;
+      }
+      return offset;
+    };
+
+    const clearBookmark = () => {
+      clearBookmarkUI();
+      localStorage.removeItem('saved_bookmark_data');
+    };
+
+    const clearBookmarkUI = () => {
+      document.querySelectorAll('.para').forEach(p => p.classList.remove('bookmarked'));
+      document.querySelectorAll('.exact-marker').forEach(m => m.remove());
+    };
+
+    const restoreSavedBookmark = () => {
+      const raw = localStorage.getItem('saved_bookmark_data');
+      if (!raw) return;
+
+      try {
+        const { index, charOffset } = JSON.parse(raw);
+        const para = document.querySelector(`.para[data-index="${index}"]`);
+        if (!para) return;
+
+        clearBookmarkUI();
+        para.classList.add('bookmarked');
+        currentParaIdx = index;
+
+        const marker = document.createElement('span');
+        marker.className = 'exact-marker';
+        marker.innerText = '📌';
+
+        let currentLen = 0;
+        let inserted = false;
+        const walker = document.createTreeWalker(para, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while ((node = walker.nextNode())) {
+          const nextLen = currentLen + node.textContent.length;
+          if (charOffset <= nextLen) {
+            let splitPos = Math.max(0, charOffset - currentLen);
+            splitPos = findWordEndOffset(node.textContent, splitPos);
+
+            const parent = node.parentNode;
+            if (node.length > splitPos) {
+              const secondPart = node.splitText(splitPos);
+              parent.insertBefore(marker, secondPart);
+            } else {
+              parent.insertBefore(marker, node.nextSibling);
+            }
+            inserted = true;
+            break;
+          }
+          currentLen = nextLen;
+        }
+
+        if (!inserted) para.appendChild(marker);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    const saveHistory = (title, content) => {
+      let history = JSON.parse(localStorage.getItem('reader_histories') || '[]');
+      history = history.filter(h => h.content !== content);
+      history.unshift({ title, content, date: new Date().toLocaleDateString('vi-VN') });
+      if (history.length > 15) history.pop();
+      localStorage.setItem('reader_histories', JSON.stringify(history));
+      loadHistoryUI();
+    };
+
+    const loadHistoryUI = () => {
+      const history = JSON.parse(localStorage.getItem('reader_histories') || '[]');
+      historyList.innerHTML = history.length === 0 ? '<li style="color:var(--text-2);font-size:13px;">Trống</li>' : '';
+      history.forEach(h => {
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        li.innerHTML = `<strong>${h.title}</strong><br><small style="color:var(--text-2)">${h.date}</small>`;
+        li.onclick = () => {
+          textInput.value = h.content;
+          processContent(true);
+          document.getElementById('sidebar-history').classList.remove('open');
+        };
+        historyList.appendChild(li);
+      });
+    };
+
+    // Tối ưu hóa Text-To-Speech cho iOS Safari/Cốc Cốc
+    const toggleTTS = () => {
+      if (!synth) {
+        alert('Trình duyệt hiện tại không hỗ trợ phát âm thanh.');
+        return;
+      }
+      if (ttsActive) {
+        synth.cancel();
+        ttsActive = false;
+        btnTTS.classList.remove('active');
+        document.querySelectorAll('.para').forEach(p => p.classList.remove('speaking'));
+      } else {
+        synth.cancel();
+        ttsActive = true;
+        btnTTS.classList.add('active');
+        speakParagraph(currentParaIdx);
+      }
+    };
+
+    const speakParagraph = (idx) => {
+      if (!ttsActive) return;
+      const target = document.querySelector(`.para[data-index="${idx}"]`);
+      if (!target) {
+        toggleTTS();
+        return;
+      }
+
+      document.querySelectorAll('.para').forEach(p => p.classList.remove('speaking'));
+      target.classList.add('speaking');
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      let textToRead = target.cloneNode(true);
+      textToRead.querySelectorAll('.exact-marker').forEach(m => m.remove());
+
+      const utter = new SpeechSynthesisUtterance(textToRead.innerText);
+      utter.lang = 'vi-VN';
+      utter.rate = 1.0;
+
+      utter.onend = () => {
+        if (!ttsActive) return;
+        currentParaIdx = idx + 1;
+        speakParagraph(currentParaIdx);
+      };
+
+      utter.onerror = () => {
+        if (ttsActive) toggleTTS();
+      };
+
+      synth.speak(utter);
+    };
+
+    const setTheme = (theme) => {
+      document.body.className = theme;
+      localStorage.setItem('saved_theme', theme);
+    };
+
+    const setFont = (type) => {
+      const font = type === 'serif' ? "'Lora', serif" : "'Plus Jakarta Sans', -apple-system, sans-serif";
+      document.documentElement.style.setProperty('--font-family', font);
+      localStorage.setItem('saved_font_type', type);
+    };
+
+    const adjustFontSize = (delta) => {
+      let current = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-size')) || 18;
+      current = Math.min(30, Math.max(14, current + delta));
+      document.documentElement.style.setProperty('--font-size', current + 'px');
+      localStorage.setItem('saved_font_size', current);
+    };
+
+    const setContentWidth = (w) => {
+      document.documentElement.style.setProperty('--content-width', w);
+      localStorage.setItem('saved_content_width', w);
+    };
+
+    const toggleSpotlight = () => {
+      document.body.classList.toggle('spotlight-on');
+      const isOn = document.body.classList.contains('spotlight-on');
+      document.getElementById('btnSpotlight').innerText = isOn ? '💡 Đèn Rọi: Bật' : '💡 Đèn Rọi: Tắt';
+      localStorage.setItem('saved_spotlight', isOn);
+    };
+
+    const toggleBionic = () => {
+      enableBionic = !enableBionic;
+      document.getElementById('btnBionic').innerText = enableBionic ? '⚡ Bionic: Bật' : '⚡ Bionic: Tắt';
+      localStorage.setItem('saved_bionic', enableBionic);
+      processContent(true);
+    };
+
+    const toggleUnbreak = () => {
+      enableUnbreak = !enableUnbreak;
+      document.getElementById('btnUnbreak').innerText = enableUnbreak ? 'Vá dòng: Bật' : 'Vá dòng: Tắt';
+      localStorage.setItem('saved_unbreak', enableUnbreak);
+    };
+
+    const toggleColumns = () => {
+      isTwoColumn = !isTwoColumn;
+      document.documentElement.style.setProperty('--column-count', isTwoColumn ? '2' : '1');
+      document.getElementById('btnColumns').innerText = isTwoColumn ? '📖 2 Cột: Bật' : '📖 2 Cột: Tắt';
+      localStorage.setItem('saved_columns', isTwoColumn);
+    };
+
+    scrollSpeedInput.oninput = () => {
+      localStorage.setItem('saved_scroll_speed', scrollSpeedInput.value);
+    };
+
+    const applyTextRules = () => {
+      localStorage.setItem('saved_replace_rules', replaceRulesInput.value);
+      processContent(true);
+    };
+
+    dropZone.onclick = () => fileInput.click();
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        textInput.value = ev.target.result;
+        processContent();
+        inputWrapper.classList.add('hidden');
+      };
+      reader.readAsText(file);
+    };
+
+    const toggleAutoScroll = () => {
+      isAutoScrolling = !isAutoScrolling;
+      btnAutoScroll.classList.toggle('active', isAutoScrolling);
+      btnAutoScroll.innerText = isAutoScrolling ? '❚❚' : '▶';
+
+      if (isAutoScrolling) {
+        const speed = scrollSpeedInput.value;
+        const interval = Math.max(12, 60 - speed * 5);
+        autoScrollTimer = setInterval(() => {
+          window.scrollBy(0, 1);
+          if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) {
+            toggleAutoScroll();
+          }
+        }, interval);
+      } else {
+        clearInterval(autoScrollTimer);
+      }
+    };
+
+    const guideModal = document.getElementById('guideModal');
+    document.getElementById('btnOpenGuide').onclick = () => guideModal.classList.add('open');
+    document.getElementById('btnCloseGuide').onclick = () => guideModal.classList.remove('open');
+    document.getElementById('btnOkGuide').onclick = () => guideModal.classList.remove('open');
+    guideModal.onclick = (e) => { if (e.target === guideModal) guideModal.classList.remove('open'); };
+
+    textInput.addEventListener('paste', () => {
+      setTimeout(() => {
+        clearBookmark();
+        processContent();
+        inputWrapper.classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 50);
+    });
+
+    // Cập nhật vị trí cuộn & thanh tiến trình trên iPhone
+    window.addEventListener('scroll', () => {
+      const totalH = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = totalH > 0 ? (window.scrollY / totalH) * 100 : 0;
+      progressBar.style.width = `${progress}%`;
+      progressPercentSpan.innerText = `${Math.round(progress)}%`;
+      localStorage.setItem('saved_scroll_pos', window.scrollY);
+    }, { passive: true });
+
+    document.getElementById('btnToggleHistory').onclick = () => document.getElementById('sidebar-history').classList.toggle('open');
+    document.getElementById('btnCloseHistory').onclick = () => document.getElementById('sidebar-history').classList.remove('open');
+    document.getElementById('btnToggleSettings').onclick = () => document.getElementById('drawer-settings').classList.toggle('open');
+    document.getElementById('btnCloseSettings').onclick = () => document.getElementById('drawer-settings').classList.remove('open');
+    document.getElementById('btnToggleInput').onclick = () => inputWrapper.classList.toggle('hidden');
+    document.getElementById('btnScrollTop').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+    btnAutoScroll.onclick = toggleAutoScroll;
+    btnTTS.onclick = toggleTTS;
+
+    // Khôi phục toàn bộ thiết lập
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('saved_theme') || 'theme-dark';
+      setTheme(savedTheme);
+
+      const savedFont = localStorage.getItem('saved_font_type');
+      if (savedFont) setFont(savedFont);
+
+      const savedSize = localStorage.getItem('saved_font_size');
+      if (savedSize) document.documentElement.style.setProperty('--font-size', savedSize + 'px');
+
+      const savedWidth = localStorage.getItem('saved_content_width');
+      if (savedWidth) setContentWidth(savedWidth);
+
+      enableBionic = localStorage.getItem('saved_bionic') === 'true';
+      document.getElementById('btnBionic').innerText = enableBionic ? '⚡ Bionic: Bật' : '⚡ Bionic: Tắt';
+
+      enableUnbreak = localStorage.getItem('saved_unbreak') === 'true';
+      document.getElementById('btnUnbreak').innerText = enableUnbreak ? 'Vá dòng: Bật' : 'Vá dòng: Tắt';
+
+      isTwoColumn = localStorage.getItem('saved_columns') === 'true';
+      document.documentElement.style.setProperty('--column-count', isTwoColumn ? '2' : '1');
+      document.getElementById('btnColumns').innerText = isTwoColumn ? '📖 2 Cột: Bật' : '📖 2 Cột: Tắt';
+
+      const savedSpotlight = localStorage.getItem('saved_spotlight') === 'true';
+      if (savedSpotlight) {
+        document.body.classList.add('spotlight-on');
+        document.getElementById('btnSpotlight').innerText = '💡 Đèn Rọi: Bật';
+      }
+
+      const savedSpeed = localStorage.getItem('saved_scroll_speed');
+      if (savedSpeed) scrollSpeedInput.value = savedSpeed;
+
+      const savedRules = localStorage.getItem('saved_replace_rules');
+      if (savedRules) replaceRulesInput.value = savedRules;
+      loadHistoryUI();
+
+      const lastText = localStorage.getItem('saved_reader_text');
+      if (lastText) {
+        textInput.value = lastText;
+        processContent(true);
+        inputWrapper.classList.add('hidden');
+        
+        const scroll = localStorage.getItem('saved_scroll_pos');
+        if (scroll) setTimeout(() => window.scrollTo({ top: parseInt(scroll), behavior: 'smooth' }), 120);
+      }
+    });
+  </script>
+</body>
+</html>
