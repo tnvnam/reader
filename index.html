@@ -8,650 +8,9 @@
   <!-- Phông chữ tuyển chọn -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
   
-  <style>
-    /* ---------------- THEME TOKENS & SYSTEM PALETTE ---------------- */
-    :root {
-      --bg: #0d0f12;
-      --bg-surface: rgba(22, 26, 31, 0.75);
-      --bg-surface-solid: #161a1f;
-      --card-bg: rgba(255, 255, 255, 0.04);
-      --card-hover: rgba(255, 255, 255, 0.08);
-      --border: rgba(255, 255, 255, 0.08);
-      --border-focus: rgba(99, 102, 241, 0.5);
-      
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      --text-sub: #64748b;
-      
-      --chapter: #f59e0b;
-      --dialogue: #fbbf24;
-      --accent: #6366f1;
-      --accent-glow: rgba(99, 102, 241, 0.25);
-      --marker: #38bdf8;
-      
-      --font-body: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-serif: 'Merriweather', Georgia, serif;
-      
-      --font-size: 19px;
-      --line-height: 1.88;
-      --content-width: 760px;
-      --column-count: 1;
-      
-      --glass-blur: blur(20px);
-      --dock-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
-    }
-
-    body.theme-sepia {
-      --bg: #f7f1e5;
-      --bg-surface: rgba(239, 230, 214, 0.85);
-      --bg-surface-solid: #efe6d6;
-      --card-bg: rgba(0, 0, 0, 0.03);
-      --card-hover: rgba(0, 0, 0, 0.06);
-      --border: rgba(67, 52, 34, 0.12);
-      --border-focus: rgba(180, 83, 9, 0.4);
-      --text-main: #33271b;
-      --text-muted: #6b553e;
-      --text-sub: #9c8369;
-      --chapter: #92400e;
-      --dialogue: #b45309;
-      --accent: #b45309;
-      --accent-glow: rgba(180, 83, 9, 0.2);
-      --marker: #d97706;
-      --dock-shadow: 0 16px 36px -8px rgba(67, 52, 34, 0.2), 0 0 0 1px rgba(67, 52, 34, 0.1);
-    }
-
-    body.theme-oled {
-      --bg: #000000;
-      --bg-surface: rgba(14, 14, 16, 0.85);
-      --bg-surface-solid: #0e0e10;
-      --card-bg: rgba(255, 255, 255, 0.03);
-      --card-hover: rgba(255, 255, 255, 0.07);
-      --border: rgba(255, 255, 255, 0.07);
-      --border-focus: rgba(129, 140, 248, 0.5);
-      --text-main: #ffffff;
-      --text-muted: #a1a1aa;
-      --text-sub: #52525b;
-      --chapter: #facc15;
-      --dialogue: #fef08a;
-      --accent: #818cf8;
-      --accent-glow: rgba(129, 140, 248, 0.2);
-      --marker: #0ea5e9;
-      --dock-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.12);
-    }
-
-    body.theme-forest {
-      --bg: #091310;
-      --bg-surface: rgba(16, 30, 25, 0.8);
-      --bg-surface-solid: #101e19;
-      --card-bg: rgba(255, 255, 255, 0.035);
-      --card-hover: rgba(255, 255, 255, 0.07);
-      --border: rgba(255, 255, 255, 0.07);
-      --border-focus: rgba(16, 185, 129, 0.5);
-      --text-main: #e2f1ec;
-      --text-muted: #82a89c;
-      --text-sub: #4b6b61;
-      --chapter: #34d399;
-      --dialogue: #a7f3d0;
-      --accent: #10b981;
-      --accent-glow: rgba(16, 185, 129, 0.25);
-      --marker: #2dd4bf;
-      --dock-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
-    }
-
-    /* ---------------- BASE & RESET ---------------- */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text-main);
-      margin: 0;
-      padding: 0;
-      font-family: var(--font-body);
-      font-size: var(--font-size);
-      line-height: var(--line-height);
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-      transition: background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1), color 0.35s ease;
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: env(safe-area-inset-top, 0px);
-      padding-bottom: calc(env(safe-area-inset-bottom, 18px) + 90px);
-    }
-
-    /* ---------------- PROGRESS BAR ---------------- */
-    #progress-track {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: transparent;
-      z-index: 1000;
-    }
-
-    #progress-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--accent), #f43f5e);
-      transition: width 0.12s ease-out;
-      box-shadow: 0 0 8px var(--accent-glow);
-    }
-
-    /* ---------------- STICKY META CAPSULE ---------------- */
-    .sticky-meta-wrap {
-      position: sticky;
-      top: env(safe-area-inset-top, 0px);
-      width: 100%;
-      max-width: var(--content-width);
-      z-index: 800;
-      padding: 8px 16px 0;
-      pointer-events: none;
-    }
-
-    .meta-capsule {
-      pointer-events: auto;
-      background: var(--bg-surface);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 6px 18px;
-      display: none;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-muted);
-      box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.15);
-      transition: all 0.3s ease;
-    }
-
-    .meta-stat {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .meta-stat svg {
-      width: 14px;
-      height: 14px;
-      opacity: 0.7;
-    }
-
-    .meta-badge {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-weight: 600;
-      font-size: 12px;
-      color: var(--text-main);
-    }
-
-    /* ---------------- MAIN CONTAINER & READER ---------------- */
-    .container {
-      width: 100%;
-      max-width: var(--content-width);
-      padding: 24px 20px 40px;
-      position: relative;
-    }
-
-    .input-sheet {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 24px;
-      box-shadow: 0 20px 40px -12px rgba(0,0,0,0.3);
-      transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-
-    .input-sheet.hidden {
-      display: none;
-    }
-
-    textarea {
-      width: 100%;
-      height: 150px;
-      background: var(--card-bg);
-      color: var(--text-main);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px 16px;
-      font-family: var(--font-body);
-      font-size: 16px;
-      line-height: 1.6;
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    .drop-trigger {
-      margin-top: 12px;
-      border: 1.5px dashed var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 13.5px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-
-    .drop-trigger:hover, .drop-trigger.dragover {
-      border-color: var(--accent);
-      color: var(--text-main);
-      background: var(--card-hover);
-    }
-
-    /* ---------------- READER TYPOGRAPHY ---------------- */
-    #reader-content {
-      line-height: var(--line-height);
-      font-size: var(--font-size);
-      text-align: justify;
-      word-break: break-word;
-      column-count: var(--column-count);
-      column-gap: 48px;
-      transition: column-count 0.2s;
-    }
-
-    .para {
-      margin-bottom: 1.25em;
-      text-indent: 1.8em;
-      cursor: pointer;
-      padding: 6px 12px;
-      border-radius: 8px;
-      transition: background-color 0.2s, opacity 0.3s, transform 0.15s;
-      border-left: 3px solid transparent;
-      break-inside: avoid;
-      position: relative;
-    }
-
-    .para:hover {
-      background-color: var(--card-hover);
-    }
-
-    .para:nth-child(odd) { color: var(--text-main); }
-    .para:nth-child(even) { color: var(--text-muted); }
-
-    .dialogue {
-      color: var(--dialogue) !important;
-      font-weight: 500;
-    }
-
-    .bionic-lead {
-      font-weight: 700;
-    }
-
-    /* Spotlight Focus Mode */
-    body.spotlight-on .para {
-      opacity: 0.2;
-    }
-    body.spotlight-on .para.bookmarked,
-    body.spotlight-on .para:hover {
-      opacity: 1;
-      transform: scale(1.004);
-    }
-
-    /* Bookmarked & TTS Highlight */
-    .para.bookmarked {
-      border-left: 3.5px solid var(--marker) !important;
-      background: rgba(56, 189, 248, 0.08) !important;
-    }
-
-    .para.speaking {
-      border-left: 3.5px solid #a855f7 !important;
-      background: rgba(168, 85, 247, 0.14) !important;
-    }
-
-    /* Elegant Word Pin Marker */
-    .exact-marker {
-      display: inline-block;
-      margin: 0 4px;
-      font-size: 1.05em;
-      line-height: 1;
-      user-select: none;
-      vertical-align: baseline;
-      animation: pinFloat 2s infinite ease-in-out;
-      filter: drop-shadow(0 2px 6px rgba(56, 189, 248, 0.6));
-    }
-
-    @keyframes pinFloat {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-3.5px); }
-    }
-
-    .chapter-heading {
-      font-size: 1.55em;
-      font-weight: 700;
-      color: var(--chapter) !important;
-      text-align: center;
-      margin: 56px 0 28px 0;
-      text-indent: 0;
-      scroll-margin-top: 70px;
-      column-span: all;
-      letter-spacing: -0.01em;
-      position: relative;
-    }
-
-    .chapter-heading::after {
-      content: "";
-      display: block;
-      width: 48px;
-      height: 2px;
-      background: var(--border);
-      margin: 14px auto 0;
-      border-radius: 99px;
-    }
-
-    /* ---------------- DYNAMIC FLOATING ISLAND DOCK ---------------- */
-    .floating-island {
-      position: fixed;
-      bottom: calc(env(safe-area-inset-bottom, 16px) + 12px);
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 999;
-      background: var(--bg-surface);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 6px 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: var(--dock-shadow);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .dock-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      position: relative;
-    }
-
-    .dock-btn svg {
-      width: 20px;
-      height: 20px;
-      stroke-width: 2;
-    }
-
-    .dock-btn:hover {
-      color: var(--text-main);
-      background: var(--card-hover);
-    }
-
-    .dock-btn:active {
-      transform: scale(0.92);
-    }
-
-    .dock-btn.active {
-      background: var(--accent);
-      color: #ffffff;
-      box-shadow: 0 0 16px var(--accent-glow);
-    }
-
-    .dock-separator {
-      width: 1px;
-      height: 20px;
-      background: var(--border);
-      margin: 0 2px;
-    }
-
-    /* ---------------- SIDEBARS & DRAWERS (GLASS PANEL) ---------------- */
-    .backdrop-curtain {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      z-index: 1100;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    .backdrop-curtain.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .drawer {
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      width: min(88vw, 360px);
-      height: 100dvh;
-      background: var(--bg-surface-solid);
-      border: 1px solid var(--border);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-      z-index: 1200;
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex;
-      flex-direction: column;
-      padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom)) 20px;
-    }
-
-    #drawer-nav { left: 0; transform: translateX(-100%); }
-    #drawer-nav.open { transform: translateX(0); }
-
-    #drawer-opts { right: 0; transform: translateX(100%); }
-    #drawer-opts.open { transform: translateX(0); }
-
-    .drawer-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .drawer-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .drawer-close {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .drawer-scroll-body {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding-right: 4px;
-    }
-
-    .drawer-scroll-body::-webkit-scrollbar {
-      width: 4px;
-    }
-    .drawer-scroll-body::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 99px;
-    }
-
-    .section-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-sub);
-      margin: 16px 0 8px;
-    }
-
-    .option-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .option-grid.three-col {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    .opt-btn {
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      font-size: 13.5px;
-      font-weight: 500;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
-    }
-
-    .opt-btn:hover {
-      background: var(--card-hover);
-      border-color: var(--border-focus);
-    }
-
-    .opt-btn.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-      box-shadow: 0 4px 12px var(--accent-glow);
-    }
-
-    /* List items inside Sidebar */
-    .toc-item, .history-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 14px;
-      color: var(--text-main);
-    }
-
-    .toc-item:hover, .history-card:hover {
-      border-color: var(--accent);
-      background: var(--card-hover);
-      transform: translateX(2px);
-    }
-
-    .history-card small {
-      display: block;
-      margin-top: 4px;
-      color: var(--text-sub);
-      font-size: 12px;
-    }
-
-    /* ---------------- MODAL SHEET (HELP) ---------------- */
-    .modal-sheet {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.95);
-      width: min(92vw, 560px);
-      max-height: 82dvh;
-      background: var(--bg-surface-solid);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
-      z-index: 1300;
-      display: none;
-      flex-direction: column;
-      padding: 24px;
-      opacity: 0;
-      transition: transform 0.25s ease, opacity 0.25s ease;
-    }
-
-    .modal-sheet.open {
-      display: flex;
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
-    }
-
-    .modal-body {
-      overflow-y: auto;
-      padding-right: 4px;
-      font-size: 14px;
-      line-height: 1.6;
-      color: var(--text-muted);
-    }
-
-    .guide-chip {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 2px 7px;
-      font-size: 12px;
-      font-family: monospace;
-      color: var(--text-main);
-    }
-
-    /* Range slider custom */
-    input[type=range] {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 6px;
-      background: var(--card-bg);
-      border-radius: 99px;
-      outline: none;
-      margin: 12px 0;
-    }
-
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
-      box-shadow: 0 0 10px var(--accent-glow);
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-dark">
 
@@ -665,7 +24,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         <span id="statWords">0 từ (~0 phút)</span>
       </div>
-      <div class="meta-badge" id="statPercent">0%</div>
+      <div class="meta-actions">
+        <button class="capsule-btn" id="btnQuickNewChap" title="Tắt chương & Mở ô trống mới">+ Chương mới</button>
+        <div class="meta-badge" id="statPercent">0%</div>
+      </div>
     </div>
   </div>
 
@@ -674,18 +36,60 @@
 
   <!-- Container Đọc Văn Bản -->
   <div class="container">
-    <!-- Khung dán & Nạp tệp (Có thể ẩn/hiện) -->
+    <!-- Khung dán & Nạp tệp (Tối ưu chống lag iOS) -->
     <div class="input-sheet" id="inputSheet">
-      <textarea id="textInput" placeholder="Dán văn bản truyện, chương hồi vào đây..."></textarea>
-      <div class="drop-trigger" id="dropArea">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-        <span>Kéo thả tệp .txt hoặc chạm để chọn tệp</span>
+      <div class="input-toolbar">
+        <div class="input-mode-badge" id="inputModeBadge">Chế độ: Thay chương mới</div>
+        <div class="input-actions">
+          <button type="button" class="chip-btn" id="btnPasteClipboard" title="Dán nhanh từ bộ nhớ tạm">
+            📋 Dán nhanh
+          </button>
+          <button type="button" class="chip-btn danger" id="btnClearMainText" title="Xoá trắng ô nhập ngay lập tức">
+            🗑️ Xoá hết
+          </button>
+        </div>
+      </div>
+
+      <div class="textarea-wrapper">
+        <textarea 
+          id="textInput" 
+          placeholder="Dán văn bản truyện, chương hồi vào đây..."
+          spellcheck="false"
+          autocorrect="off"
+          autocapitalize="off"
+          autocomplete="off"
+        ></textarea>
+      </div>
+
+      <div class="input-footer-bar">
+        <div class="drop-trigger" id="dropArea">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          <span>Nạp tệp .txt</span>
+        </div>
+        <button type="button" class="primary-read-btn" id="btnStartRead">
+          📖 Bắt đầu đọc
+        </button>
       </div>
       <input type="file" id="fileUpload" accept=".txt,text/plain" style="display: none;">
     </div>
 
     <!-- Nội dung truyện đã xử lý -->
     <div id="reader-content"></div>
+
+    <!-- Thẻ hành động cuối chương (Hiện khi có nội dung đang đọc) -->
+    <div class="chapter-end-card hidden" id="chapterEndCard">
+      <div class="end-card-icon">✨</div>
+      <div class="end-card-title">Bạn đã đọc đến cuối chương</div>
+      <div class="end-card-desc">Tắt chương hiện tại để giải phóng bộ nhớ và mở khung trống chèn chương tiếp theo, hoặc nối thêm chương vào bên dưới.</div>
+      <div class="end-card-actions">
+        <button type="button" class="end-btn primary" id="btnFinishAndNew">
+          🔄 Tắt chương & Chèn chương mới
+        </button>
+        <button type="button" class="end-btn secondary" id="btnAppendChapter">
+          ➕ Nối thêm chương vào dưới
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- ---------------- DYNAMIC FLOATING ISLAND (DOCK ĐIỀU HƯỚNG) ---------------- -->
@@ -693,8 +97,11 @@
     <button class="dock-btn" id="btnOpenNav" title="Mục lục & Lịch sử">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
     </button>
-    <button class="dock-btn" id="btnToggleInput" title="Dán/Sửa văn bản">
+    <button class="dock-btn" id="btnToggleInput" title="Mở khung nhập / Sửa văn bản">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+    </button>
+    <button class="dock-btn" id="btnNewBlankChap" title="Tắt chương & Mở ô trống chèn chương mới">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
     </button>
     
     <div class="dock-separator"></div>
@@ -732,8 +139,11 @@
       <div class="section-label">Mục lục chương hiện tại</div>
       <div id="tocContainer"></div>
       
-      <div class="section-label" style="margin-top: 24px;">Lịch sử các chương đã đọc</div>
-      <div id="historyContainer"></div>
+      <div class="section-label-row" style="margin-top: 24px;">
+        <span class="section-label" style="margin:0;">Lịch sử các chương đã đọc</span>
+        <button type="button" class="mini-clear-btn" id="btnClearHistory">Xoá lịch sử</button>
+      </div>
+      <div id="historyContainer" style="margin-top: 8px;"></div>
     </div>
   </aside>
 
@@ -748,41 +158,88 @@
     </div>
 
     <div class="drawer-scroll-body">
-      <div class="section-label">Chế độ màu nền</div>
+      <div class="section-label">Chủ đề màu sắc (Presets)</div>
       <div class="option-grid">
-        <button class="opt-btn" onclick="applyTheme('theme-dark')">Obsidian Tối</button>
-        <button class="opt-btn" onclick="applyTheme('theme-sepia')">Giấy Cổ Sepia</button>
-        <button class="opt-btn" onclick="applyTheme('theme-oled')">OLED Đen Tuyệt</button>
-        <button class="opt-btn" onclick="applyTheme('theme-forest')">Rừng Đêm</button>
+        <button class="opt-btn theme-btn" data-theme="theme-dark" onclick="applyTheme('theme-dark')">Obsidian Tối</button>
+        <button class="opt-btn theme-btn" data-theme="theme-sepia" onclick="applyTheme('theme-sepia')">Giấy Cổ Sepia</button>
+        <button class="opt-btn theme-btn" data-theme="theme-oled" onclick="applyTheme('theme-oled')">OLED Đen Tuyệt</button>
+        <button class="opt-btn theme-btn" data-theme="theme-forest" onclick="applyTheme('theme-forest')">Rừng Đêm</button>
+        <button class="opt-btn theme-btn" data-theme="theme-paper" onclick="applyTheme('theme-paper')">Giấy Sáng</button>
+        <button class="opt-btn theme-btn" data-theme="theme-nord" onclick="applyTheme('theme-nord')">Xanh Bắc Âu</button>
       </div>
 
-      <div class="section-label">Phông chữ & Bố cục</div>
-      <div class="option-grid">
-        <button class="opt-btn" id="btnFontSans" onclick="applyFont('sans')">Hiện đại (Sans)</button>
-        <button class="opt-btn" id="btnFontSerif" onclick="applyFont('serif')">Sách in (Serif)</button>
+      <div class="section-label-row">
+        <span class="section-label" style="margin:0;">Tùy chỉnh màu nền & chữ</span>
+        <button type="button" class="mini-clear-btn" onclick="resetCustomColors()">Mặc định</button>
       </div>
-      <div class="option-grid">
-        <button class="opt-btn" id="btnTwoCols" onclick="toggleTwoCols()">2 Cột: Tắt</button>
-        <button class="opt-btn" id="btnBionic" onclick="toggleBionic()">Bionic: Tắt</button>
+      <div class="color-picker-grid">
+        <label class="color-item">
+          <span>Màu nền</span>
+          <input type="color" id="pickerBg" value="#0d0f12">
+        </label>
+        <label class="color-item">
+          <span>Màu chữ</span>
+          <input type="color" id="pickerText" value="#f1f5f9">
+        </label>
+        <label class="color-item">
+          <span>Hội thoại</span>
+          <input type="color" id="pickerDialogue" value="#fbbf24">
+        </label>
       </div>
-      <button class="opt-btn" style="width: 100%; margin-bottom: 12px;" id="btnSpotlight" onclick="toggleSpotlight()">💡 Chế độ Đèn Rọi: Tắt</button>
+      <button class="opt-btn" style="width: 100%; margin-bottom: 12px;" id="btnAltParaColor" onclick="toggleAltParaColor()">
+        🎨 Đổi màu đoạn chẵn/lẻ: Bật
+      </button>
 
-      <div class="section-label">Kích thước chữ & Khổ rộng</div>
+      <div class="section-label">Phông chữ</div>
+      <div class="option-grid">
+        <button class="opt-btn font-btn" id="btnFontSans" onclick="applyFont('sans')">Be Vietnam</button>
+        <button class="opt-btn font-btn" id="btnFontSerif" onclick="applyFont('serif')">Merriweather</button>
+        <button class="opt-btn font-btn" id="btnFontLora" onclick="applyFont('lora')">Lora</button>
+        <button class="opt-btn font-btn" id="btnFontLiterata" onclick="applyFont('literata')">Literata</button>
+      </div>
+
+      <div class="section-label">Kích thước chữ & Giãn dòng</div>
       <div class="option-grid">
         <button class="opt-btn" onclick="stepFontSize(-1)">Cỡ chữ A -</button>
         <button class="opt-btn" onclick="stepFontSize(1)">Cỡ chữ A +</button>
       </div>
+      <div class="option-grid">
+        <button class="opt-btn" onclick="stepLineHeight(-0.1)">Giãn dòng -</button>
+        <button class="opt-btn" onclick="stepLineHeight(0.1)">Giãn dòng +</button>
+      </div>
+
+      <div class="section-label">Bố cục & Chế độ đọc</div>
+      <div class="option-grid">
+        <button class="opt-btn" id="btnAlign" onclick="toggleTextAlign()">Căn lề: Đều 2 bên</button>
+        <button class="opt-btn" id="btnTwoCols" onclick="toggleTwoCols()">2 Cột: Tắt</button>
+      </div>
+      <div class="option-grid">
+        <button class="opt-btn" id="btnBionic" onclick="toggleBionic()">Bionic: Tắt</button>
+        <button class="opt-btn" id="btnSpotlight" onclick="toggleSpotlight()">💡 Đèn Rọi: Tắt</button>
+      </div>
+
+      <div class="section-label">Khổ rộng trang đọc</div>
       <div class="option-grid three-col">
         <button class="opt-btn" onclick="applyWidth('680px')">Hẹp</button>
         <button class="opt-btn" onclick="applyWidth('780px')">Vừa</button>
         <button class="opt-btn" onclick="applyWidth('1040px')">Rộng</button>
       </div>
 
-      <div class="section-label">Bảng đổi tên nhân vật (Từ cũ = Từ mới)</div>
-      <textarea id="replaceInput" style="height: 68px; font-size: 13.5px;" placeholder="hắn ta = anh&#10;tiểu tử = cậu ấy"></textarea>
+      <div class="section-label-row">
+        <span class="section-label" style="margin:0;">Đổi tên / Từ vựng (Cũ = Mới)</span>
+        <button type="button" class="mini-clear-btn" id="btnClearReplace">🗑️ Xoá ô này</button>
+      </div>
+      <textarea 
+        id="replaceInput" 
+        style="height: 76px; font-size: 13.5px; margin-top: 6px;" 
+        placeholder="hắn ta = anh&#10;tiểu tử = cậu ấy"
+        spellcheck="false"
+        autocorrect="off"
+        autocapitalize="off"
+      ></textarea>
       <div class="option-grid" style="margin-top: 8px;">
         <button class="opt-btn" id="btnUnbreak" onclick="toggleUnbreak()">Vá ngắt dòng: Tắt</button>
-        <button class="opt-btn" onclick="commitReplacements()">Áp dụng</button>
+        <button class="opt-btn active" onclick="commitReplacements()">Áp dụng ngay</button>
       </div>
 
       <div class="section-label">Tốc độ cuộn rảnh tay (Phím Space)</div>
@@ -797,624 +254,22 @@
       <button class="drawer-close" id="btnCloseGuide">✕</button>
     </div>
     <div class="modal-body">
-      <p><strong>1. Đánh dấu vị trí đọc (Ghim ranh giới từ thông minh):</strong><br>
-      Chạm hoặc click vào bất kỳ từ nào, ghim <span class="guide-chip">📌</span> sẽ tự động nằm ngay sau từ đó (không làm xé đôi chữ). Chạm lại vào đoạn đang ghim để hủy ghim.</p>
+      <p><strong>1. Tối ưu chống lag trên iPhone / Mobile:</strong><br>
+      Sử dụng nút <span class="guide-chip">🗑️ Xoá hết</span> hoặc <span class="guide-chip">📋 Dán nhanh</span> phía trên ô nhập để xóa hoặc chèn văn bản dài trong 0 giây mà không cần bôi đen toàn bộ gây đơ máy.</p>
+
+      <p><strong>2. Chuyển & Thêm chương mới:</strong><br>
+      Khi đọc xuống cuối trang, bấm <strong>"Tắt chương & Chèn chương mới"</strong> để đóng chương cũ và mở sẵn ô trống dán chương mới, hoặc bấm <strong>"Nối thêm chương"</strong> để ghép tiếp vào bên dưới.</p>
+
+      <p><strong>3. Đánh dấu vị trí đọc (Ghim thông minh):</strong><br>
+      Chạm vào bất kỳ từ nào để đặt ghim <span class="guide-chip">📌</span> ngay sau từ đó. Chạm lại vào đoạn đang ghim để bỏ ghim.</p>
       
-      <p><strong>2. Nghe đọc Audio (TTS tiếng Việt):</strong><br>
-      Bấm icon tai nghe trên thanh dock để bắt đầu đọc từ đoạn đang dừng. Màn hình tự động cuộn theo câu đang phát. Bấm lại để dừng ngay lập tức.</p>
-
-      <p><strong>3. Phím tắt tiện lợi trên bàn phím:</strong><br>
+      <p><strong>4. Phím tắt tiện lợi (PC/Mac):</strong><br>
       • <span class="guide-chip">Space</span> : Bật/tắt tự động cuộn rảnh tay.<br>
-      • <span class="guide-chip">J</span> / <span class="guide-chip">K</span> : Nhảy nhanh tới đoạn tiếp theo hoặc đoạn trước.<br>
-      • <span class="guide-chip">F</span> : Bật/thoát chế độ toàn màn hình.</p>
-
-      <p><strong>4. Tự động ghi nhớ:</strong><br>
-      Mọi cài đặt màu sắc, phông chữ, vị trí cuộn trang và lịch sử đọc đều được lưu hoàn toàn cục bộ trên máy của bạn.</p>
+      • <span class="guide-chip">J</span> / <span class="guide-chip">K</span> : Nhảy tới đoạn tiếp theo / đoạn trước.<br>
+      • <span class="guide-chip">F</span> : Bật/thoát toàn màn hình.</p>
     </div>
   </div>
 
-  <!-- ---------------- CORE LOGIC JAVASCRIPT ---------------- -->
-  <script>
-    // Elements DOM
-    const textInput = document.getElementById('textInput');
-    const inputSheet = document.getElementById('inputSheet');
-    const readerContent = document.getElementById('reader-content');
-    const progressFill = document.getElementById('progress-fill');
-    const metaCapsule = document.getElementById('metaCapsule');
-    const statWords = document.getElementById('statWords');
-    const statPercent = document.getElementById('statPercent');
-    const curtain = document.getElementById('curtain');
-    
-    const drawerNav = document.getElementById('drawer-nav');
-    const drawerOpts = document.getElementById('drawer-opts');
-    const modalGuide = document.getElementById('modalGuide');
-    
-    const tocContainer = document.getElementById('tocContainer');
-    const historyContainer = document.getElementById('historyContainer');
-    const dropArea = document.getElementById('dropArea');
-    const fileUpload = document.getElementById('fileUpload');
-    const replaceInput = document.getElementById('replaceInput');
-    const scrollSpeedSlider = document.getElementById('scrollSpeedSlider');
-    
-    const btnAutoScroll = document.getElementById('btnAutoScroll');
-    const btnTTS = document.getElementById('btnTTS');
-
-    // States
-    let isAutoScrolling = false;
-    let autoScrollTimer = null;
-    let synth = window.speechSynthesis;
-    let ttsActive = false;
-    let currentParaIdx = 0;
-    
-    let isBionic = false;
-    let isUnbreak = false;
-    let isTwoCols = false;
-
-    // Regex phát hiện chương hồi
-    const isChapter = (str) => /^(chương|hồi|quyển|tiết|thứ)\s+[0-9ivxlcdm]+/i.test(str.trim()) || /^chương\s+/i.test(str.trim());
-
-    // Nổi bật lời thoại trong ngoặc hoặc sau gạch đầu dòng
-    const formatDialogue = (str) => {
-      return str
-        .replace(/(".*?"|“.*?”|「.*?」)/g, '<span class="dialogue">$1</span>')
-        .replace(/^(-\s.*)/g, '<span class="dialogue">$1</span>');
-    };
-
-    // Bionic Reading Algorithm
-    const applyBionic = (str) => {
-      if (!isBionic) return str;
-      return str.replace(/([a-zA-ZÀ-ỹ0-9]+)/g, (match) => {
-        const mid = Math.ceil(match.length / 2);
-        return `<span class="bionic-lead">${match.slice(0, mid)}</span>${match.slice(mid)}`;
-      });
-    };
-
-    // Bảng thay thế từ ngữ
-    const applyReplacements = (str) => {
-      const raw = replaceInput.value.trim();
-      if (!raw) return str;
-      let out = str;
-      raw.split('\n').forEach(rule => {
-        const parts = rule.split('=');
-        if (parts.length === 2) {
-          const from = parts[0].trim();
-          const to = parts[1].trim();
-          if (from) {
-            out = out.replaceAll(new RegExp(from, 'gi'), to);
-          }
-        }
-      });
-      return out;
-    };
-
-    // Tự vá ngắt dòng gãy câu
-    const smartUnbreak = (str) => {
-      if (!isUnbreak) return str;
-      const rawLines = str.split('\n');
-      let res = '';
-      for (let i = 0; i < rawLines.length; i++) {
-        let cur = rawLines[i].trim();
-        if (!cur) continue;
-        res += cur;
-        if (!/[.!?…”"']$/.test(cur) && !isChapter(cur)) {
-          res += ' ';
-        } else {
-          res += '\n\n';
-        }
-      }
-      return res;
-    };
-
-    const cleanRaw = (raw) => {
-      return raw.replace(/nguồn\s*:\s*[^\n]+/gi, '')
-                .replace(/truyện\s*được\s*đăng\s*tại[^\n]+/gi, '')
-                .replace(/chúc\s*bạn\s*đọc\s*truyện\s*vui\s*vẻ[^\n]*/gi, '');
-    };
-
-    // Render nội dung chính
-    const renderReader = (fromHistory = false) => {
-      let text = cleanRaw(textInput.value);
-      text = smartUnbreak(text);
-      text = applyReplacements(text);
-
-      if (!text.trim()) {
-        readerContent.innerHTML = '';
-        metaCapsule.style.display = 'none';
-        return;
-      }
-
-      const lines = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
-      let wordCount = 0;
-      let chapterIdx = 0;
-      tocContainer.innerHTML = '';
-
-      let firstTitle = '';
-      let pCount = 0;
-
-      const html = lines.map((line) => {
-        wordCount += line.split(/\s+/).length;
-        if (isChapter(line)) {
-          if (!firstTitle) firstTitle = line;
-          chapterIdx++;
-          const cId = `chap-${chapterIdx}`;
-          
-          // Thêm mục lục
-          const tItem = document.createElement('div');
-          tItem.className = 'toc-item';
-          tItem.innerText = line;
-          tItem.onclick = () => {
-            document.getElementById(cId).scrollIntoView({ behavior: 'smooth' });
-            closeAllDrawers();
-          };
-          tocContainer.appendChild(tItem);
-
-          return `<div id="${cId}" class="chapter-heading">${line}</div>`;
-        }
-        const idx = pCount++;
-        let formatted = formatDialogue(line);
-        if (isBionic) formatted = applyBionic(formatted);
-        return `<p class="para" data-index="${idx}">${formatted}</p>`;
-      }).join('');
-
-      readerContent.innerHTML = html;
-      metaCapsule.style.display = 'flex';
-      
-      const mins = Math.ceil(wordCount / 220);
-      statWords.innerText = `${wordCount.toLocaleString()} từ (~${mins} phút)`;
-
-      localStorage.setItem('lumina_saved_text', textInput.value);
-      if (!fromHistory) saveHistoryRecord(firstTitle || lines[0].substring(0, 32), textInput.value);
-
-      restoreSavedMarker();
-    };
-
-    // Kiểm tra ranh giới từ (không xé chữ)
-    const isWordChar = (char) => /[a-zA-Z0-9À-ỹ_]/.test(char);
-    const findWordEnd = (text, offset) => {
-      let end = offset;
-      while (end < text.length && isWordChar(text[end])) end++;
-      return end;
-    };
-
-    // Đánh dấu chính xác vị trí con trỏ & Toggle
-    readerContent.addEventListener('click', (e) => {
-      const para = e.target.closest('.para');
-      if (!para) return;
-
-      const index = parseInt(para.dataset.index, 10);
-
-      // Nếu đoạn đang có ghim -> Hủy ghim
-      if (para.classList.contains('bookmarked')) {
-        clearBookmarkData();
-        return;
-      }
-
-      clearBookmarkUI();
-
-      let targetNode = null;
-      let targetOffset = 0;
-
-      if (document.caretRangeFromPoint) {
-        const range = document.caretRangeFromPoint(e.clientX, e.clientY);
-        if (range) {
-          targetNode = range.startContainer;
-          targetOffset = range.startOffset;
-        }
-      } else if (document.caretPositionFromPoint) {
-        const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
-        if (pos) {
-          targetNode = pos.offsetNode;
-          targetOffset = pos.offset;
-        }
-      }
-
-      const marker = document.createElement('span');
-      marker.className = 'exact-marker';
-      marker.innerText = '📌';
-
-      let charOffset = 0;
-
-      if (targetNode && targetNode.nodeType === Node.TEXT_NODE && para.contains(targetNode)) {
-        const textVal = targetNode.nodeValue;
-        const finalOffset = findWordEnd(textVal, targetOffset);
-
-        const parent = targetNode.parentNode;
-        if (finalOffset < textVal.length) {
-          const afterText = targetNode.splitText(finalOffset);
-          parent.insertBefore(marker, afterText);
-        } else {
-          parent.insertBefore(marker, targetNode.nextSibling);
-        }
-        charOffset = getCharOffsetInRoot(marker, para);
-      } else {
-        para.appendChild(marker);
-        charOffset = para.textContent.length;
-      }
-
-      para.classList.add('bookmarked');
-      currentParaIdx = index;
-
-      localStorage.setItem('lumina_bookmark_data', JSON.stringify({ index, charOffset }));
-    });
-
-    const getCharOffsetInRoot = (node, root) => {
-      let offset = 0;
-      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
-      let cur;
-      while ((cur = walker.nextNode())) {
-        if (cur === node || node.contains(cur)) break;
-        offset += cur.textContent.length;
-      }
-      return offset;
-    };
-
-    const clearBookmarkData = () => {
-      clearBookmarkUI();
-      localStorage.removeItem('lumina_bookmark_data');
-    };
-
-    const clearBookmarkUI = () => {
-      document.querySelectorAll('.para').forEach(p => p.classList.remove('bookmarked'));
-      document.querySelectorAll('.exact-marker').forEach(m => m.remove());
-    };
-
-    const restoreSavedMarker = () => {
-      const raw = localStorage.getItem('lumina_bookmark_data');
-      if (!raw) return;
-
-      try {
-        const { index, charOffset } = JSON.parse(raw);
-        const para = document.querySelector(`.para[data-index="${index}"]`);
-        if (!para) return;
-
-        clearBookmarkUI();
-        para.classList.add('bookmarked');
-        currentParaIdx = index;
-
-        const marker = document.createElement('span');
-        marker.className = 'exact-marker';
-        marker.innerText = '📌';
-
-        let currentLen = 0;
-        let inserted = false;
-        const walker = document.createTreeWalker(para, NodeFilter.SHOW_TEXT, null, false);
-        let node;
-        while ((node = walker.nextNode())) {
-          const nextLen = currentLen + node.textContent.length;
-          if (charOffset <= nextLen) {
-            let splitPos = Math.max(0, charOffset - currentLen);
-            splitPos = findWordEnd(node.textContent, splitPos);
-
-            const parent = node.parentNode;
-            if (node.length > splitPos) {
-              const secondPart = node.splitText(splitPos);
-              parent.insertBefore(marker, secondPart);
-            } else {
-              parent.insertBefore(marker, node.nextSibling);
-            }
-            inserted = true;
-            break;
-          }
-          currentLen = nextLen;
-        }
-
-        if (!inserted) para.appendChild(marker);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    // Quản lý Lịch sử Đọc
-    const saveHistoryRecord = (title, content) => {
-      let list = JSON.parse(localStorage.getItem('lumina_histories') || '[]');
-      list = list.filter(h => h.content !== content);
-      list.unshift({ title, content, date: new Date().toLocaleDateString('vi-VN') });
-      if (list.length > 15) list.pop();
-      localStorage.setItem('lumina_histories', JSON.stringify(list));
-      buildHistoryUI();
-    };
-
-    const buildHistoryUI = () => {
-      const list = JSON.parse(localStorage.getItem('lumina_histories') || '[]');
-      historyContainer.innerHTML = list.length === 0 ? '<div style="color:var(--text-sub);font-size:13px;padding:8px;">Trống</div>' : '';
-      list.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'history-card';
-        card.innerHTML = `<strong>${item.title}</strong><small>${item.date}</small>`;
-        card.onclick = () => {
-          textInput.value = item.content;
-          renderReader(true);
-          closeAllDrawers();
-        };
-        historyContainer.appendChild(card);
-      });
-    };
-
-    // Text to Speech (TTS)
-    const toggleTTS = () => {
-      if (ttsActive) {
-        synth.cancel();
-        ttsActive = false;
-        btnTTS.classList.remove('active');
-        document.querySelectorAll('.para').forEach(p => p.classList.remove('speaking'));
-      } else {
-        synth.cancel();
-        ttsActive = true;
-        btnTTS.classList.add('active');
-        playSpeech(currentParaIdx);
-      }
-    };
-
-    const playSpeech = (idx) => {
-      if (!ttsActive) return;
-      const target = document.querySelector(`.para[data-index="${idx}"]`);
-      if (!target) {
-        toggleTTS();
-        return;
-      }
-
-      document.querySelectorAll('.para').forEach(p => p.classList.remove('speaking'));
-      target.classList.add('speaking');
-      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-      let textNode = target.cloneNode(true);
-      textNode.querySelectorAll('.exact-marker').forEach(m => m.remove());
-
-      const utter = new SpeechSynthesisUtterance(textNode.innerText);
-      utter.lang = 'vi-VN';
-      utter.rate = 1.0;
-
-      utter.onend = () => {
-        if (!ttsActive) return;
-        currentParaIdx = idx + 1;
-        playSpeech(currentParaIdx);
-      };
-
-      utter.onerror = () => {
-        if (ttsActive) toggleTTS();
-      };
-
-      synth.speak(utter);
-    };
-
-    // Cài đặt Giao diện
-    const applyTheme = (theme) => {
-      document.body.className = theme;
-      localStorage.setItem('lumina_theme', theme);
-    };
-
-    const applyFont = (type) => {
-      const fontVal = type === 'serif' ? "var(--font-serif)" : "var(--font-body)";
-      document.documentElement.style.setProperty('--font-body', fontVal);
-      document.getElementById('btnFontSans').classList.toggle('active', type === 'sans');
-      document.getElementById('btnFontSerif').classList.toggle('active', type === 'serif');
-      localStorage.setItem('lumina_font', type);
-    };
-
-    const stepFontSize = (delta) => {
-      let cur = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-size')) || 19;
-      cur = Math.min(32, Math.max(14, cur + delta));
-      document.documentElement.style.setProperty('--font-size', cur + 'px');
-      localStorage.setItem('lumina_font_size', cur);
-    };
-
-    const applyWidth = (w) => {
-      document.documentElement.style.setProperty('--content-width', w);
-      localStorage.setItem('lumina_width', w);
-    };
-
-    const toggleSpotlight = () => {
-      document.body.classList.toggle('spotlight-on');
-      const isOn = document.body.classList.contains('spotlight-on');
-      document.getElementById('btnSpotlight').innerText = isOn ? '💡 Chế độ Đèn Rọi: Bật' : '💡 Chế độ Đèn Rọi: Tắt';
-      localStorage.setItem('lumina_spotlight', isOn);
-    };
-
-    const toggleBionic = () => {
-      isBionic = !isBionic;
-      document.getElementById('btnBionic').innerText = isBionic ? 'Bionic: Bật' : 'Bionic: Tắt';
-      document.getElementById('btnBionic').classList.toggle('active', isBionic);
-      localStorage.setItem('lumina_bionic', isBionic);
-      renderReader(true);
-    };
-
-    const toggleUnbreak = () => {
-      isUnbreak = !isUnbreak;
-      document.getElementById('btnUnbreak').innerText = isUnbreak ? 'Vá ngắt dòng: Bật' : 'Vá ngắt dòng: Tắt';
-      document.getElementById('btnUnbreak').classList.toggle('active', isUnbreak);
-      localStorage.setItem('lumina_unbreak', isUnbreak);
-    };
-
-    const toggleTwoCols = () => {
-      isTwoCols = !isTwoCols;
-      document.documentElement.style.setProperty('--column-count', isTwoCols ? '2' : '1');
-      document.getElementById('btnTwoCols').innerText = isTwoCols ? '2 Cột: Bật' : '2 Cột: Tắt';
-      document.getElementById('btnTwoCols').classList.toggle('active', isTwoCols);
-      localStorage.setItem('lumina_cols', isTwoCols);
-    };
-
-    scrollSpeedSlider.oninput = () => {
-      localStorage.setItem('lumina_scroll_speed', scrollSpeedSlider.value);
-    };
-
-    const commitReplacements = () => {
-      localStorage.setItem('lumina_replacements', replaceInput.value);
-      renderReader(true);
-    };
-
-    // Cuộn rảnh tay
-    const toggleAutoScroll = () => {
-      isAutoScrolling = !isAutoScrolling;
-      btnAutoScroll.classList.toggle('active', isAutoScrolling);
-
-      if (isAutoScrolling) {
-        const speed = scrollSpeedSlider.value;
-        const interval = Math.max(12, 60 - speed * 5);
-        autoScrollTimer = setInterval(() => {
-          window.scrollBy(0, 1);
-          if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) {
-            toggleAutoScroll();
-          }
-        }, interval);
-      } else {
-        clearInterval(autoScrollTimer);
-      }
-    };
-
-    // File Drag & Drop
-    dropArea.onclick = () => fileUpload.click();
-    fileUpload.onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        textInput.value = ev.target.result;
-        renderReader();
-        inputSheet.classList.add('hidden');
-      };
-      reader.readAsText(file);
-    };
-
-    dropArea.ondragover = (e) => { e.preventDefault(); dropArea.classList.add('dragover'); };
-    dropArea.ondragleave = () => dropArea.classList.remove('dragover');
-    dropArea.ondrop = (e) => {
-      e.preventDefault();
-      dropArea.classList.remove('dragover');
-      if (e.dataTransfer.files.length) {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          textInput.value = ev.target.result;
-          renderReader();
-          inputSheet.classList.add('hidden');
-        };
-        reader.readAsText(e.dataTransfer.files[0]);
-      }
-    };
-
-    // Quản lý Drawer & Modal
-    const closeAllDrawers = () => {
-      drawerNav.classList.remove('open');
-      drawerOpts.classList.remove('open');
-      modalGuide.classList.remove('open');
-      curtain.classList.remove('active');
-    };
-
-    document.getElementById('btnOpenNav').onclick = () => {
-      closeAllDrawers();
-      drawerNav.classList.add('open');
-      curtain.classList.add('active');
-    };
-    document.getElementById('btnOpenOpts').onclick = () => {
-      closeAllDrawers();
-      drawerOpts.classList.add('open');
-      curtain.classList.add('active');
-    };
-    document.getElementById('btnHelp').onclick = () => {
-      closeAllDrawers();
-      modalGuide.classList.add('open');
-      curtain.classList.add('active');
-    };
-
-    document.getElementById('btnCloseNav').onclick = closeAllDrawers;
-    document.getElementById('btnCloseOpts').onclick = closeAllDrawers;
-    document.getElementById('btnCloseGuide').onclick = closeAllDrawers;
-    curtain.onclick = closeAllDrawers;
-
-    document.getElementById('btnToggleInput').onclick = () => {
-      inputSheet.classList.toggle('hidden');
-      if (!inputSheet.classList.contains('hidden')) textInput.focus();
-    };
-
-    document.getElementById('btnScrollTop').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-    btnAutoScroll.onclick = toggleAutoScroll;
-    btnTTS.onclick = toggleTTS;
-
-    // Phím tắt bàn phím
-    window.addEventListener('keydown', (e) => {
-      if (document.activeElement === textInput || document.activeElement === replaceInput) return;
-
-      if (e.code === 'Space') {
-        e.preventDefault();
-        toggleAutoScroll();
-      } else if (e.key === 'j' || e.key === 'J') {
-        currentParaIdx++;
-        document.querySelector(`.para[data-index="${currentParaIdx}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else if (e.key === 'k' || e.key === 'K') {
-        if (currentParaIdx > 0) currentParaIdx--;
-        document.querySelector(`.para[data-index="${currentParaIdx}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else if (e.key === 'f' || e.key === 'F') {
-        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-        else document.exitFullscreen();
-      }
-    });
-
-    textInput.addEventListener('paste', () => {
-      setTimeout(() => {
-        clearBookmarkData();
-        renderReader();
-        inputSheet.classList.add('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 50);
-    });
-
-    window.addEventListener('scroll', () => {
-      const totalH = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = totalH > 0 ? (window.scrollY / totalH) * 100 : 0;
-      progressFill.style.width = `${progress}%`;
-      statPercent.innerText = `${Math.round(progress)}%`;
-      localStorage.setItem('lumina_scroll_pos', window.scrollY);
-    }, { passive: true });
-
-    // Khởi tạo & khôi phục toàn bộ settings từ localStorage
-    window.addEventListener('DOMContentLoaded', () => {
-      const savedTheme = localStorage.getItem('lumina_theme') || 'theme-dark';
-      applyTheme(savedTheme);
-
-      const savedFont = localStorage.getItem('lumina_font');
-      if (savedFont) applyFont(savedFont);
-
-      const savedSize = localStorage.getItem('lumina_font_size');
-      if (savedSize) document.documentElement.style.setProperty('--font-size', savedSize + 'px');
-
-      const savedWidth = localStorage.getItem('lumina_width');
-      if (savedWidth) applyWidth(savedWidth);
-
-      isBionic = localStorage.getItem('lumina_bionic') === 'true';
-      document.getElementById('btnBionic').innerText = isBionic ? 'Bionic: Bật' : 'Bionic: Tắt';
-      document.getElementById('btnBionic').classList.toggle('active', isBionic);
-
-      isUnbreak = localStorage.getItem('lumina_unbreak') === 'true';
-      document.getElementById('btnUnbreak').innerText = isUnbreak ? 'Vá ngắt dòng: Bật' : 'Vá ngắt dòng: Tắt';
-      document.getElementById('btnUnbreak').classList.toggle('active', isUnbreak);
-
-      isTwoCols = localStorage.getItem('lumina_cols') === 'true';
-      document.documentElement.style.setProperty('--column-count', isTwoCols ? '2' : '1');
-      document.getElementById('btnTwoCols').innerText = isTwoCols ? '2 Cột: Bật' : '2 Cột: Tắt';
-      document.getElementById('btnTwoCols').classList.toggle('active', isTwoCols);
-
-      if (localStorage.getItem('lumina_spotlight') === 'true') {
-        document.body.classList.add('spotlight-on');
-        document.getElementById('btnSpotlight').innerText = '💡 Chế độ Đèn Rọi: Bật';
-      }
-
-      const savedSpeed = localStorage.getItem('lumina_scroll_speed');
-      if (savedSpeed) scrollSpeedSlider.value = savedSpeed;
-
-      const savedRules = localStorage.getItem('lumina_replacements');
-      if (savedRules) replaceInput.value = savedRules;
-
-      buildHistoryUI();
-
-      const lastText = localStorage.getItem('lumina_saved_text');
-      if (lastText) {
-        textInput.value = lastText;
-        renderReader(true);
-        inputSheet.classList.add('hidden');
-        
-        const scrollPos = localStorage.getItem('lumina_scroll_pos');
-        if (scrollPos) setTimeout(() => window.scrollTo({ top: parseInt(scrollPos), behavior: 'smooth' }), 120);
-      }
-    });
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
