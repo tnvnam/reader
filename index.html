@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Lumina Reader Studio — Trình Đọc Truyện Cao Cấp</title>
   
   <!-- Bộ phông chữ tuyển chọn -->
@@ -23,31 +25,35 @@
   <!-- Thông báo nổi kiểu Dynamic Island -->
   <div id="toast-pill" class="toast-pill">Đã lưu</div>
 
-  <!-- ---------------- TOP ZEN HEADER ---------------- -->
+  <!-- ---------------- TOP ZEN HEADER (CHỐNG TRÀN & CHỐNG CHỒNG NÚT TRÊN IPHONE) ---------------- -->
   <header class="zen-header" id="zenHeader">
     <div class="zen-header-inner">
+      <!-- Cột trái: Nút 3 gạch cố định độc lập -->
       <div class="header-left">
-        <button type="button" class="icon-pill-btn" id="btnOpenNav" title="Mục lục & Quản lý chương">
+        <button type="button" class="icon-circle-btn" id="btnOpenNav" aria-label="Mục lục & Quản lý chương" title="Mục lục & Lịch sử">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
-        <div class="header-title-wrap">
-          <span class="app-brand" id="headerTitle">Lumina Studio</span>
-          <span class="reading-meta" id="statWords">Chưa nạp chương</span>
-        </div>
       </div>
 
+      <!-- Cột giữa: Tên chương & Thống kê tự co giãn -->
+      <div class="header-center">
+        <span class="app-brand" id="headerTitle">Lumina Studio</span>
+        <span class="reading-meta" id="statWords">Chưa nạp chương</span>
+      </div>
+
+      <!-- Cột phải: Cụm nút Icon gọn gàng không bao giờ tràn sang trái -->
       <div class="header-right">
-        <button type="button" class="action-pill-btn pin-jump hidden" id="btnJumpBookmark" title="Nhảy tới từ đang ghim">
-          📌 Tới ghim
+        <button type="button" class="icon-circle-btn pin-btn hidden" id="btnJumpBookmark" title="Nhảy tới vị trí đang ghim">
+          <span>📌</span>
         </button>
-        <button type="button" class="action-pill-btn mode-toggle" id="btnQuickReadMode" title="Đổi chế độ Cuộn dọc / Lật sách">
-          ↕️ Cuộn
+        <button type="button" class="icon-circle-btn" id="btnQuickReadMode" title="Đổi chế độ Lật sách / Cuộn dọc">
+          <span id="quickModeIcon">📖</span>
         </button>
-        <button type="button" class="icon-pill-btn" id="btnToggleSearch" title="Tìm kiếm trong truyện">
+        <button type="button" class="icon-circle-btn" id="btnToggleSearch" title="Tìm kiếm trong truyện">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         </button>
-        <button type="button" class="action-pill-btn accent" id="btnHeaderNewChap" title="Tắt chương & Mở ô trống">
-          + Chương mới
+        <button type="button" class="icon-circle-btn accent-btn" id="btnHeaderNewChap" title="Tắt chương & Mở ô trống chèn chương mới">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
         <div class="progress-pill" id="statPercent">0%</div>
       </div>
@@ -59,7 +65,7 @@
         <input 
           type="text" 
           id="searchInput" 
-          placeholder="Tìm từ khóa..." 
+          placeholder="Tìm từ khóa trong truyện..." 
           spellcheck="false" 
           autocorrect="off" 
           autocapitalize="off"
@@ -99,7 +105,7 @@
       <div class="textarea-shell">
         <textarea 
           id="textInput" 
-          placeholder="Dán nội dung chương truyện vào đây, hoặc bấm '📋 Dán & Đọc ngay' ở góc trên..."
+          placeholder="Dán nội dung chương truyện vào đây, hoặc bấm '📋 Dán & Đọc ngay' phía trên..."
           spellcheck="false"
           autocorrect="off"
           autocapitalize="off"
@@ -119,46 +125,72 @@
       <input type="file" id="fileUpload" accept=".txt,text/plain" style="display: none;">
     </section>
 
-    <!-- KHU VỰC ĐỌC TRUYỆN (Hỗ trợ cả Cuộn dọc & Lật sách) -->
-    <div id="book-viewport" class="book-viewport">
-      <!-- Vùng chạm lật trang nhanh bên trái/phải khi ở chế độ Lật sách -->
-      <div class="page-tap-zone left hidden" id="tapZoneLeft" title="Trang trước"></div>
-      <div class="page-tap-zone right hidden" id="tapZoneRight" title="Trang sau"></div>
+    <!-- KHU VỰC SÁCH 3D & CUỘN DỌC -->
+    <div id="book-stage" class="book-stage">
+      <div id="book-sheet" class="book-sheet">
+        <!-- Gáy sách đổ bóng & hiệu ứng nếp gấp khi lật trang -->
+        <div class="book-spine-shadow"></div>
+        <div class="page-under-shadow" id="pageUnderShadow"></div>
 
-      <article id="reader-content"></article>
-
-      <!-- THẺ KẾT THÚC CHƯƠNG -->
-      <section class="chapter-complete-card hidden" id="chapterEndCard">
-        <div class="complete-ornament">✦ ✦ ✦</div>
-        <h3 class="complete-title">Đã đọc đến cuối chương</h3>
-        <p class="complete-subtitle" id="endCardSummary">Bạn có thể tắt chương hiện tại để mở ô trống chèn chương mới, hoặc nối tiếp chương sau vào bên dưới.</p>
-        
-        <div class="complete-actions">
-          <button type="button" class="complete-btn primary-action" id="btnFinishAndNew">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-            <span>Tắt chương & Mở ô trống mới</span>
-          </button>
-
-          <button type="button" class="complete-btn fast-paste-action" id="btnFinishAndPaste">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-            <span>Tắt chương & Dán đọc luôn</span>
-          </button>
-
-          <button type="button" class="complete-btn secondary-action" id="btnAppendChapter">
-            <span>➕ Nối thêm chương vào dưới</span>
-          </button>
+        <!-- Thanh tiêu đề đầu trang sách (chỉ hiện ở chế độ Lật sách) -->
+        <div class="book-running-header hidden" id="bookRunningHeader">
+          <span id="runningChapTitle">Lumina Reader</span>
+          <span id="runningChapMeta">Trang 1</span>
         </div>
-      </section>
+
+        <!-- Vùng chạm mép trái/phải để lật trang 1 tay -->
+        <div class="page-tap-zone left hidden" id="tapZoneLeft" title="Chạm để lật về trang trước"></div>
+        <div class="page-tap-zone right hidden" id="tapZoneRight" title="Chạm để lật sang trang sau"></div>
+
+        <!-- Nội dung văn bản chính -->
+        <article id="reader-content"></article>
+
+        <!-- Lớp tờ giấy 3D dùng để diễn hoạt hiệu ứng lật trang như sách thật -->
+        <div id="turning-leaf" class="turning-leaf hidden">
+          <div class="leaf-front" id="leafFrontContent"></div>
+          <div class="leaf-back"></div>
+          <div class="leaf-crease-gradient"></div>
+        </div>
+
+        <!-- THẺ KẾT THÚC CHƯƠNG -->
+        <section class="chapter-complete-card hidden" id="chapterEndCard">
+          <div class="complete-ornament">✦ ✦ ✦</div>
+          <h3 class="complete-title">Đã đọc hết chương</h3>
+          <p class="complete-subtitle" id="endCardSummary">Bạn có thể tắt chương hiện tại để mở ô trống chèn chương mới, hoặc nối tiếp chương sau vào bên dưới.</p>
+          
+          <div class="complete-actions">
+            <button type="button" class="complete-btn primary-action" id="btnFinishAndNew">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+              <span>Tắt chương & Mở ô trống mới</span>
+            </button>
+
+            <button type="button" class="complete-btn fast-paste-action" id="btnFinishAndPaste">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+              <span>Tắt chương & Dán đọc luôn</span>
+            </button>
+
+            <button type="button" class="complete-btn secondary-action" id="btnAppendChapter">
+              <span>➕ Nối thêm chương vào dưới</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Chân trang sách (Chỉ hiện khi bật chế độ Lật sách) -->
+        <div class="book-running-footer hidden" id="bookRunningFooter">
+          <span id="footerTimeLeft">~1 phút còn lại</span>
+          <span id="footerPageNum">1 / 1</span>
+        </div>
+      </div>
     </div>
 
-    <!-- THANH ĐIỀU KHIỂN LẬT TRANG SÁCH (Chỉ hiện khi bật chế độ Lật sách) -->
+    <!-- THANH ĐIỀU KHIỂN LẬT TRANG SÁCH -->
     <div class="book-pager-bar hidden" id="bookPagerBar">
-      <button type="button" class="pager-btn" id="btnPrevPage">← Trang trước</button>
+      <button type="button" class="pager-btn" id="btnPrevPage">‹ Trước</button>
       <div class="pager-center">
         <span id="pagerInfo">Trang 1 / 1</span>
         <input type="range" id="pageSlider" min="1" max="1" value="1">
       </div>
-      <button type="button" class="pager-btn" id="btnNextPage">Trang sau →</button>
+      <button type="button" class="pager-btn" id="btnNextPage">Tiếp ›</button>
     </div>
 
   </main>
@@ -177,7 +209,7 @@
     <span class="hud-label" id="ttsStatusLabel">Đang đọc...</span>
     <button type="button" class="hud-step" id="btnTtsNext" title="Câu tiếp">⏭</button>
     <button type="button" class="hud-chip" id="btnTtsRate" title="Tốc độ giọng đọc">1.0x</button>
-    <button type="button" class="hud-chip" id="btnSleepTimer" title="Hẹn giờ tắt">🌙 Tắt hẹn giờ</button>
+    <button type="button" class="hud-chip" id="btnSleepTimer" title="Hẹn giờ tắt">🌙 Hẹn giờ</button>
     <button type="button" class="hud-stop" id="btnTtsStop">Dừng</button>
   </div>
 
@@ -193,7 +225,7 @@
       <span>Chương mới</span>
     </button>
 
-    <button type="button" class="dock-item" id="btnBookModeDock" title="Bật/Tắt chế độ Lật trang sách">
+    <button type="button" class="dock-item" id="btnBookModeDock" title="Bật/Tắt chế độ Lật trang sách 3D">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
       <span id="lblDockMode">Lật sách</span>
     </button>
@@ -217,10 +249,10 @@
   <!-- Lớp nền mờ khi mở Menu -->
   <div class="backdrop-curtain" id="curtain"></div>
 
-  <!-- ---------------- DRAWER TRÁI: QUẢN LÝ CHƯƠNG & LỊCH SỬ ---------------- -->
+  <!-- ---------------- DRAWER TRÁI: QUẢN LÝ CHƯƠNG, SỔ TAY & LỊCH SỬ ---------------- -->
   <aside class="side-drawer" id="drawer-nav">
     <div class="sheet-header">
-      <div class="sheet-title">📚 Quản Lý Chương & Lịch Sử</div>
+      <div class="sheet-title">📚 Quản Lý Chương & Sổ Tay</div>
       <button type="button" class="sheet-close" id="btnCloseNav">✕</button>
     </div>
     <div class="sheet-body">
@@ -230,8 +262,14 @@
       </div>
       <div id="tocContainer" style="margin-top: 8px;"></div>
 
-      <div class="group-label-row" style="margin-top: 24px;">
-        <span class="group-label" style="margin:0;">Lịch sử đã lưu (Xoá từng mục hoặc tất cả)</span>
+      <div class="group-label-row" style="margin-top: 22px;">
+        <span class="group-label" style="margin:0;">⭐ Sổ tay câu trích dẫn đã lưu</span>
+        <button type="button" class="inline-action-btn" id="btnSaveCurrentQuote">+ Lưu đoạn đang ghim</button>
+      </div>
+      <div id="quotesContainer" style="margin-top: 8px;"></div>
+
+      <div class="group-label-row" style="margin-top: 22px;">
+        <span class="group-label" style="margin:0;">Lịch sử đã đọc (Xoá từng mục)</span>
         <button type="button" class="inline-danger-btn" id="btnClearHistory">Xoá hết</button>
       </div>
       <div id="historyContainer" style="margin-top: 8px;"></div>
@@ -242,27 +280,36 @@
   <aside class="studio-bottom-sheet" id="drawer-opts">
     <div class="sheet-drag-handle"></div>
     <div class="sheet-header">
-      <div class="sheet-title">🎨 Tùy Chỉnh Giao Diện & Trải Nghiệm</div>
-      <div style="display:flex; gap:8px;">
+      <div class="sheet-title">🎨 Tùy Chỉnh Sách & Giao Diện</div>
+      <div style="display:flex; gap:6px;">
         <button type="button" class="inline-action-btn" id="btnScrollTop">⬆ Đầu trang</button>
-        <button type="button" class="inline-action-btn" id="btnHelp">Hướng dẫn</button>
+        <button type="button" class="inline-action-btn" id="btnHelp">Mẹo</button>
         <button type="button" class="sheet-close" id="btnCloseOpts">✕</button>
       </div>
     </div>
 
     <div class="sheet-body">
-      <!-- 1. Kiểu đọc: Cuộn dọc vs Lật trang sách -->
-      <div class="group-label">Chế độ đọc & Hiệu ứng lật sách</div>
+      <!-- 1. Kiểu đọc & Kiểu lật sách 3D -->
+      <div class="group-label">Chế độ đọc & Hiệu ứng lật trang sách</div>
       <div class="segmented-grid two-cols">
-        <button type="button" class="seg-btn active" id="btnModeScroll" onclick="setReadingMode('scroll')">↕️ Cuộn dọc truyền thống</button>
-        <button type="button" class="seg-btn" id="btnModeBook" onclick="setReadingMode('book')">📖 Lật trang sách (Book Flip)</button>
+        <button type="button" class="seg-btn active" id="btnModeScroll" onclick="setReadingMode('scroll')">↕️ Cuộn dọc</button>
+        <button type="button" class="seg-btn" id="btnModeBook" onclick="setReadingMode('book')">📖 Lật trang sách</button>
       </div>
-      <div class="segmented-grid two-cols" style="margin-top:8px;">
-        <button type="button" class="seg-btn active" id="btnAnimSlide" onclick="setFlipAnimation('slide')">Hiệu ứng: Trượt mượt Kindle</button>
-        <button type="button" class="seg-btn" id="btnAnimCurl" onclick="setFlipAnimation('curl')">Hiệu ứng: Lật giấy 3D</button>
+      <div class="segmented-grid three-cols" style="margin-top:8px;">
+        <button type="button" class="seg-btn active" id="btnAnimReal" onclick="setFlipAnimation('real')">Lật giấy 3D thật</button>
+        <button type="button" class="seg-btn" id="btnAnimPeel" onclick="setFlipAnimation('peel')">Cuốn mép sách</button>
+        <button type="button" class="seg-btn" id="btnAnimSlide" onclick="setFlipAnimation('slide')">Trượt Kindle</button>
       </div>
 
-      <!-- 2. Chủ đề màu có sẵn -->
+      <!-- 2. Âm thanh lật sách & Không gian đọc (Web Audio) -->
+      <div class="group-label">Âm thanh lật giấy & Nhạc nền tập trung (Offline)</div>
+      <div class="segmented-grid three-cols">
+        <button type="button" class="seg-btn" id="btnFlipSound" onclick="toggleFlipSound()">🔊 Tiếng lật giấy: Tắt</button>
+        <button type="button" class="seg-btn" id="btnAmbRain" onclick="toggleAmbience('rain')">🌧️ Mưa đêm: Tắt</button>
+        <button type="button" class="seg-btn" id="btnAmbFire" onclick="toggleAmbience('fire')">🔥 Lửa ấm: Tắt</button>
+      </div>
+
+      <!-- 3. Chủ đề màu có sẵn -->
       <div class="group-label">Bảng màu chủ đề</div>
       <div class="theme-swatch-grid">
         <button type="button" class="swatch-card theme-btn" data-theme="theme-dark" onclick="applyTheme('theme-dark')">
@@ -291,7 +338,7 @@
         </button>
       </div>
 
-      <!-- 3. Tự phối màu Nền & Chữ -->
+      <!-- 4. Tự phối màu Nền & Chữ -->
       <div class="group-label-row">
         <span class="group-label" style="margin:0;">Tự chỉnh màu Nền & Chữ (Xem trực tiếp)</span>
         <button type="button" class="inline-action-btn" onclick="resetCustomColors()">Khôi phục màu gốc</button>
@@ -315,7 +362,7 @@
         </label>
       </div>
 
-      <!-- 4. Bảo vệ mắt ban đêm -->
+      <!-- 5. Bảo vệ mắt ban đêm -->
       <div class="slider-control-box">
         <div class="slider-head">
           <span>🌙 Độ ấm bảo vệ mắt ban đêm (Ánh vàng)</span>
@@ -324,7 +371,7 @@
         <input type="range" id="warmthSlider" min="0" max="60" value="0">
       </div>
 
-      <!-- 5. Phông chữ & Kích cỡ -->
+      <!-- 6. Phông chữ & Kích cỡ -->
       <div class="group-label">Phông chữ đọc truyện</div>
       <div class="segmented-grid four-cols">
         <button type="button" class="seg-btn" id="btnFontSans" onclick="applyFont('sans')">Be Vietnam</button>
@@ -350,7 +397,7 @@
           </div>
         </div>
         <div class="stepper-box">
-          <span class="stepper-title">Cách đoạn (<b id="lblParaGap">1.2em</b>)</span>
+          <span class="stepper-title">Cách đoạn (<b id="lblParaGap">1.1em</b>)</span>
           <div class="stepper-btns">
             <button type="button" onclick="stepParaGap(-0.2)">Sát</button>
             <button type="button" onclick="stepParaGap(0.2)">Thưa</button>
@@ -358,7 +405,7 @@
         </div>
       </div>
 
-      <!-- 6. Bố cục & Công cụ đọc nâng cao -->
+      <!-- 7. Bố cục & Công cụ đọc nâng cao -->
       <div class="group-label">Trải nghiệm trình bày</div>
       <div class="segmented-grid two-cols">
         <button type="button" class="seg-btn" id="btnAlign" onclick="toggleTextAlign()">Căn lề: Đều 2 bên</button>
@@ -376,7 +423,7 @@
         <button type="button" class="seg-btn" onclick="applyWidth('1020px')">Rộng</button>
       </div>
 
-      <!-- 7. Thay thế tên nhân vật / thuật ngữ -->
+      <!-- 8. Thay thế tên nhân vật / thuật ngữ -->
       <div class="group-label-row">
         <span class="group-label" style="margin:0;">Từ điển đổi tên (Từ cũ = Từ mới)</span>
         <button type="button" class="inline-danger-btn" id="btnClearReplace">🗑️ Xoá sạch ô này</button>
@@ -402,17 +449,21 @@
       <button type="button" class="sheet-close" id="btnCloseGuide">✕</button>
     </div>
     <div class="sheet-body" style="font-size:14px; line-height:1.65; color:var(--text-muted);">
-      <p><strong>1. Chế độ Lật trang sách (Book Flip):</strong><br>
-      • Bấm nút <strong>Lật sách</strong> dưới thanh Dock hoặc nút <strong>↕️ Cuộn / 📖 Sách</strong> trên thanh đỉnh trang để chuyển đổi.<br>
-      • Khi ở chế độ Lật sách: Vuốt trái/phải trên màn hình iPhone, chạm vào mép trái/phải của trang, hoặc dùng phím mũi tên <code>←</code> / <code>→</code> để sang trang.</p>
+      <p><strong>1. Lật trang sách 3D như sách giấy thật:</strong><br>
+      • Khi bật chế độ <strong>Lật sách</strong>, trang truyện hiển thị như một cuốn sách có gáy đổ bóng và xấp giấy bên mép phải.<br>
+      • Vuốt ngang màn hình iPhone, chạm vào mép trái/phải trang giấy, hoặc dùng phím mũi tên <code>←</code> / <code>→</code> để xem tờ giấy uốn cong và lật sang trang mới.</p>
 
-      <p><strong>2. Xoá từng chương cụ thể:</strong><br>
-      • Bấm nút <strong>🗑️ Xoá chương này</strong> ngay dưới tiêu đề mỗi chương khi đang đọc, hoặc mở <strong>Mục lục (☰)</strong> để xoá bất kỳ chương nào trong danh sách và trong Lịch sử.</p>
-      
-      <p><strong>3. Ghim từ không xô lệch chữ trên iPhone (📌):</strong><br>
-      • Chạm vào từ bất kỳ để tô sáng và neo biểu tượng 📌 lơ lửng phía trên từ đó (không làm giãn dòng hay mất chữ trên iOS). Bấm <strong>"📌 Tới ghim"</strong> để quay lại đúng trang và vị trí đang đọc dở.</p>
+      <p><strong>2. Ghim vị trí đọc & Lưu trích dẫn:</strong><br>
+      • Chạm vào từ bất kỳ để đặt ghim <code>📌</code> ở lề trái đoạn văn và gạch chân từ đang đọc (không bao giờ đè lên chữ hay thanh công cụ).<br>
+      • Mở menu <code>☰</code> bên trái và bấm <strong>"+ Lưu đoạn đang ghim"</strong> để cất các câu tâm đắc vào Sổ tay.</p>
+
+      <p><strong>3. Âm thanh Mưa đêm & Tiếng lật giấy:</strong><br>
+      • Trong mục <strong>Giao diện</strong>, bạn có thể bật tiếng lật giấy sột soạt nhẹ và tiếng mưa rơi / lửa trại ấm áp để đọc truyện ban đêm.</p>
     </div>
   </div>
+
+  <!-- Khung đo chiều cao ẩn để chia trang sách chính xác 100% theo màn hình iPhone -->
+  <div id="pagination-measure-box" aria-hidden="true"></div>
 
   <script src="app.js"></script>
 </body>

@@ -1,8 +1,5 @@
 /* ==========================================================================
-   LUMINA READER STUDIO — CORE ENGINE
-   - Quản lý & Xoá từng chương cụ thể
-   - Ghim từ Zero-Layout-Shift (Không đẩy/mất chữ trên iPhone)
-   - Chế độ Lật trang sách (Book Flip Mode) + Cảm ứng vuốt/chạm
+   LUMINA READER STUDIO — REAL 3D PAGE FLIP, GUTTER PIN & WEB AUDIO ENGINE
    ========================================================================== */
 
 // ---------------- DOM ELEMENTS ----------------
@@ -21,8 +18,20 @@ const inputModeBadge = document.getElementById('inputModeBadge');
 const composerWordCount = document.getElementById('composerWordCount');
 const btnCancelComposer = document.getElementById('btnCancelComposer');
 
-const bookViewport = document.getElementById('book-viewport');
+const bookStage = document.getElementById('book-stage');
+const bookSheet = document.getElementById('book-sheet');
 const readerContent = document.getElementById('reader-content');
+const turningLeaf = document.getElementById('turning-leaf');
+const leafFrontContent = document.getElementById('leafFrontContent');
+const pageUnderShadow = document.getElementById('pageUnderShadow');
+const bookRunningHeader = document.getElementById('bookRunningHeader');
+const bookRunningFooter = document.getElementById('bookRunningFooter');
+const runningChapTitle = document.getElementById('runningChapTitle');
+const runningChapMeta = document.getElementById('runningChapMeta');
+const footerTimeLeft = document.getElementById('footerTimeLeft');
+const footerPageNum = document.getElementById('footerPageNum');
+const measureBox = document.getElementById('pagination-measure-box');
+
 const chapterEndCard = document.getElementById('chapterEndCard');
 const endCardSummary = document.getElementById('endCardSummary');
 const btnJumpBookmark = document.getElementById('btnJumpBookmark');
@@ -45,6 +54,7 @@ const modalGuide = document.getElementById('modalGuide');
 const curtain = document.getElementById('curtain');
 
 const tocContainer = document.getElementById('tocContainer');
+const quotesContainer = document.getElementById('quotesContainer');
 const historyContainer = document.getElementById('historyContainer');
 const dropArea = document.getElementById('dropArea');
 const fileUpload = document.getElementById('fileUpload');
@@ -67,17 +77,16 @@ const warmthSlider = document.getElementById('warmthSlider');
 const warmthValLabel = document.getElementById('warmthValLabel');
 
 // ---------------- APPLICATION STATE ----------------
-// Danh sách chương có cấu trúc: [{ id, title, rawLines, wordCount }]
 let chaptersList = [];
-let allRenderBlocks = []; // Danh sách phẳng các khối (tiêu đề + đoạn văn) để phân trang
+let allRenderBlocks = [];
 let isAppendMode = false;
 let totalWordsCount = 0;
 
-// Chế độ đọc: 'scroll' (Cuộn dọc) hoặc 'book' (Lật trang sách)
-let readingMode = 'scroll';
-let flipAnimStyle = 'slide'; // 'slide' | 'curl'
-let bookPages = []; // Mảng chứa danh sách khối của từng trang
+let readingMode = 'scroll'; // 'scroll' | 'book'
+let flipAnimStyle = 'real'; // 'real' | 'peel' | 'slide'
+let bookPages = [];
 let currentPageIdx = 0;
+let isTurningAnim = false;
 
 let isAutoScrolling = false;
 let scrollSpeed = 3;
@@ -97,6 +106,13 @@ let isTwoCols = false;
 let isDropCap = true;
 let textAlignMode = 'justify';
 
+// Web Audio Synthesizer State
+let audioCtx = null;
+let isFlipSoundOn = false;
+let activeAmbience = null; // null | 'rain' | 'fire'
+let ambienceNode = null;
+let ambienceGain = null;
+
 let searchMatches = [];
 let currentMatchIdx = -1;
 let lastScrollY = 0;
@@ -107,8 +123,115 @@ const showToast = (msg) => {
   toastPill.innerText = msg;
   toastPill.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toastPill.classList.remove('show'), 2200);
+  toastTimer = setTimeout(() => toastPill.classList.remove('show'), 2100);
 };
+
+// ---------------- WEB AUDIO SYNTHESIZER (TIẾNG LẬT SÁCH & MƯA ĐÊM OFFLINE) ----------------
+const ensureAudioCtx = () => {
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) audioCtx = new AudioContextClass();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+};
+
+// Tạo âm thanh lật trang giấy sột soạt chân thực
+const playPaperRustle = () => {
+  if (!isFlipSoundOn) return;
+  try {
+    ensureAudioCtx();
+    if (!audioCtx) return;
+
+    const duration = 0.16;
+    const bufferSize = audioCtx.sampleRate * duration;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+      const env = Math.sin((i / bufferSize) * Math.PI);
+      data[i] = (Math.random() * 2 - 1) * env * 0.18;
+    }
+
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(1400, audioCtx.currentTime);
+    filter.Q.setValueAtTime(1.8, audioCtx.currentTime);
+
+    noise.connect(filter);
+    filter.connect(audioCtx.destination);
+    noise.start();
+  } catch (e) {}
+};
+
+const toggleFlipSound = () => {
+  isFlipSoundOn = !isFlipSoundOn;
+  const btn = document.getElementById('btnFlipSound');
+  btn.innerText = isFlipSoundOn ? '🔊 Tiếng lật giấy: Bật' : '🔊 Tiếng lật giấy: Tắt';
+  btn.classList.toggle('active', isFlipSoundOn);
+  localStorage.setItem('lumina_flip_sound', isFlipSoundOn);
+  if (isFlipSoundOn) playPaperRustle();
+};
+window.toggleFlipSound = toggleFlipSound;
+
+const stopAmbienceAudio = () => {
+  if (ambienceNode) {
+    try { ambienceNode.stop(); } catch (e) {}
+    ambienceNode.disconnect();
+    ambienceNode = null;
+  }
+};
+
+const toggleAmbience = (type) => {
+  stopAmbienceAudio();
+  if (activeAmbience === type) {
+    activeAmbience = null;
+  } else {
+    activeAmbience = type;
+    try {
+      ensureAudioCtx();
+      const bufferSize = audioCtx.sampleRate * 3;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const out = buffer.getChannelData(0);
+      let lastOut = 0.0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        out[i] = (lastOut + 0.02 * white) / 1.02;
+        lastOut = out[i];
+        out[i] *= type === 'fire' ? 0.22 : 0.14;
+      }
+
+      ambienceNode = audioCtx.createBufferSource();
+      ambienceNode.buffer = buffer;
+      ambienceNode.loop = true;
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = type === 'fire' ? 420 : 950;
+
+      ambienceGain = audioCtx.createGain();
+      ambienceGain.gain.value = 0.35;
+
+      ambienceNode.connect(filter);
+      filter.connect(ambienceGain);
+      ambienceGain.connect(audioCtx.destination);
+      ambienceNode.start();
+    } catch (e) {}
+  }
+
+  document.getElementById('btnAmbRain').classList.toggle('active', activeAmbience === 'rain');
+  document.getElementById('btnAmbRain').innerText =
+    activeAmbience === 'rain' ? '🌧️ Mưa đêm: Bật' : '🌧️ Mưa đêm: Tắt';
+
+  document.getElementById('btnAmbFire').classList.toggle('active', activeAmbience === 'fire');
+  document.getElementById('btnAmbFire').innerText =
+    activeAmbience === 'fire' ? '🔥 Lửa ấm: Bật' : '🔥 Lửa ấm: Tắt';
+};
+window.toggleAmbience = toggleAmbience;
 
 // ---------------- ZERO-LAG CLEAR TRÊN IPHONE ----------------
 const instantClearInput = (inputEl) => {
@@ -128,7 +251,7 @@ textInput.addEventListener('input', () => {
   composerWordCount.innerText = `${val.split(/\s+/).length.toLocaleString()} từ`;
 });
 
-// ---------------- XỬ LÝ VĂN BẢN & TÁCH CHƯƠNG CẤU TRÚC ----------------
+// ---------------- XỬ LÝ VĂN BẢN & CHƯƠNG ----------------
 const isChapterHeading = (str) =>
   /^(chương|hồi|quyển|tiết|thứ|phần|chapter)\s+[0-9ivxlcdm]+/i.test(str.trim()) ||
   /^chương\s+/i.test(str.trim());
@@ -186,7 +309,6 @@ const applyBionic = (str) => {
   });
 };
 
-// Tách một khối văn bản thô thành mảng các chương độc lập
 const parseTextIntoChapters = (rawText) => {
   let cleaned = cleanRaw(rawText);
   cleaned = smartUnbreak(cleaned);
@@ -228,15 +350,9 @@ const parseTextIntoChapters = (rawText) => {
   return parsed;
 };
 
-// Đồng bộ mảng chương về lại chuỗi lưu trữ
 const serializeChapters = () => {
   return chaptersList
-    .map((c) => {
-      if (c.hasExplicitTitle) {
-        return c.title + '\n\n' + c.lines.join('\n\n');
-      }
-      return c.lines.join('\n\n');
-    })
+    .map((c) => (c.hasExplicitTitle ? c.title + '\n\n' + c.lines.join('\n\n') : c.lines.join('\n\n')))
     .join('\n\n');
 };
 
@@ -259,15 +375,16 @@ const deleteChapterById = (chapId) => {
   rebuildAndRender(true);
   showToast(`Đã xoá: ${removedTitle}`);
 };
-
 window.deleteChapterById = deleteChapterById;
 
-// ---------------- DỰNG CẤU TRÚC RENDER & PHÂN TRANG SÁCH ----------------
+// ---------------- DỰNG KHỐI & PHÂN TRANG SÁCH THEO CHIỀU CAO DOM THỰC TẾ ----------------
 const rebuildAndRender = (preservePosition = false) => {
   if (chaptersList.length === 0) {
     readerContent.innerHTML = '';
     chapterEndCard.classList.add('hidden');
     bookPagerBar.classList.add('hidden');
+    bookRunningHeader.classList.add('hidden');
+    bookRunningFooter.classList.add('hidden');
     tapZoneLeft.classList.add('hidden');
     tapZoneRight.classList.add('hidden');
     btnCancelComposer.classList.add('hidden');
@@ -283,10 +400,7 @@ const rebuildAndRender = (preservePosition = false) => {
   let globalParaIdx = 0;
 
   chaptersList.forEach((chap, cIdx) => {
-    let chapWords = 0;
-    if (chap.hasExplicitTitle) {
-      chapWords += chap.title.split(/\s+/).length;
-    }
+    let chapWords = chap.hasExplicitTitle ? chap.title.split(/\s+/).length : 0;
     chap.lines.forEach((l) => {
       chapWords += l.split(/\s+/).length;
     });
@@ -294,16 +408,14 @@ const rebuildAndRender = (preservePosition = false) => {
     totalWordsCount += chapWords;
 
     const domChapId = `dom-${chap.id}`;
-
-    // Tạo khối tiêu đề chương (Có nút Xoá chương cụ thể ngay trên đầu chương)
     const displayTitle = applyReplacements(chap.title);
+
     allRenderBlocks.push({
       type: 'heading',
       chapId: chap.id,
+      chapTitle: displayTitle,
       domId: domChapId,
-      title: displayTitle,
       wordCount: chapWords,
-      charWeight: 180,
       html: `
         <div id="${domChapId}" class="chapter-header-wrap" data-chap-id="${chap.id}">
           <h2 class="chapter-heading">${displayTitle}</h2>
@@ -317,7 +429,6 @@ const rebuildAndRender = (preservePosition = false) => {
       `
     });
 
-    // Tạo mục lục kèm nút xoá từng chương
     const tocRow = document.createElement('div');
     tocRow.className = 'list-row-card';
     tocRow.innerHTML = `
@@ -337,7 +448,6 @@ const rebuildAndRender = (preservePosition = false) => {
     };
     tocContainer.appendChild(tocRow);
 
-    // Tạo các đoạn văn trong chương
     chap.lines.forEach((rawLine, lIdx) => {
       let line = applyReplacements(rawLine);
       let formatted = formatDialogue(line);
@@ -349,9 +459,10 @@ const rebuildAndRender = (preservePosition = false) => {
       allRenderBlocks.push({
         type: 'para',
         chapId: chap.id,
+        chapTitle: displayTitle,
         paraIndex: pIdx,
         rawText: line,
-        charWeight: Math.max(90, line.length),
+        wordCount: line.split(/\s+/).length,
         html: `<p class="para ${firstClass}" data-index="${pIdx}">${formatted}</p>`
       });
     });
@@ -360,23 +471,24 @@ const rebuildAndRender = (preservePosition = false) => {
   btnCancelComposer.classList.remove('hidden');
   const mainTitle = applyReplacements(chaptersList[0].title);
   headerTitle.innerText =
-    chaptersList.length > 1 ? `${mainTitle} (+${chaptersList.length - 1} chương)` : mainTitle;
+    chaptersList.length > 1 ? `${mainTitle} (+${chaptersList.length - 1})` : mainTitle;
 
   const mins = Math.max(1, Math.ceil(totalWordsCount / 230));
   statWords.innerText = `${chaptersList.length} chương • ${totalWordsCount.toLocaleString()} từ (~${mins}p)`;
-  endCardSummary.innerText = `Đã đọc hết ${chaptersList.length} chương (${totalWordsCount.toLocaleString()} từ). Bạn muốn tắt chương để mở khung trống hay nối thêm chương mới?`;
+  endCardSummary.innerText = `Đã hoàn thành ${chaptersList.length} chương (${totalWordsCount.toLocaleString()} từ). Bạn muốn tắt chương để mở khung trống hay nối thêm chương mới?`;
 
   if (readingMode === 'book') {
-    buildBookPages(preservePosition);
+    buildExactBookPages(preservePosition);
   } else {
     renderScrollMode();
   }
 };
 
-// ---------------- CHẾ ĐỘ CUỘN DỌC (SCROLL MODE) ----------------
 const renderScrollMode = () => {
   document.body.classList.remove('mode-book');
   bookPagerBar.classList.add('hidden');
+  bookRunningHeader.classList.add('hidden');
+  bookRunningFooter.classList.add('hidden');
   tapZoneLeft.classList.add('hidden');
   tapZoneRight.classList.add('hidden');
 
@@ -386,50 +498,51 @@ const renderScrollMode = () => {
   restoreSavedMarker();
 };
 
-// ---------------- CHẾ ĐỘ LẬT TRANG SÁCH (BOOK FLIP MODE) ----------------
-const calculateTargetCharsPerPage = () => {
-  const fontSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-size')) || 20;
-  const lineHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--line-height')) || 1.9;
-  const availH = Math.max(360, window.innerHeight - 230);
-  const availW = Math.min(window.innerWidth - 40, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--content-width')) || 760);
-
-  const linesPerPage = Math.max(8, Math.floor(availH / (fontSize * lineHeight)));
-  const charsPerLine = Math.max(28, Math.floor(availW / (fontSize * 0.55)));
-  return Math.floor(linesPerPage * charsPerLine * 0.78);
-};
-
-const buildBookPages = (preservePage = false) => {
+// ---------------- ĐO CHIỀU CAO THỰC TẾ & LẬT TRANG SÁCH 3D ----------------
+const buildExactBookPages = (preservePage = false) => {
   document.body.classList.add('mode-book');
-  const budget = calculateTargetCharsPerPage();
+
+  // Tính chiều cao tối đa cho phần chữ của 1 trang sách trên màn hình hiện tại
+  const sheetWidth = Math.min(window.innerWidth - 28, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--content-width')) || 760) - 44;
+  const maxPageContentHeight = Math.max(300, window.innerHeight - 280);
+
+  measureBox.style.width = `${sheetWidth}px`;
+  measureBox.style.fontFamily = getComputedStyle(document.body).fontFamily;
+  measureBox.style.fontSize = getComputedStyle(document.body).fontSize;
+  measureBox.style.lineHeight = getComputedStyle(document.body).lineHeight;
+  measureBox.innerHTML = `<div class="chapter-block">${allRenderBlocks.map((b) => b.html).join('')}</div>`;
+
+  const measuredNodes = Array.from(measureBox.firstElementChild.children);
   bookPages = [];
-
   let curPage = [];
-  let curWeight = 0;
+  let curHeight = 0;
 
-  allRenderBlocks.forEach((block) => {
-    // Nếu gặp tiêu đề chương mới và trang hiện tại đã có nội dung, sang trang mới cho đẹp
+  allRenderBlocks.forEach((block, idx) => {
+    const nodeH = (measuredNodes[idx]?.offsetHeight || 56) + 16;
+
+    // Sang trang mới nếu gặp tiêu đề chương mới hoặc vượt chiều cao trang sách
     if (block.type === 'heading' && curPage.length > 0) {
       bookPages.push(curPage);
       curPage = [block];
-      curWeight = block.charWeight;
+      curHeight = nodeH;
       return;
     }
 
-    if (curWeight + block.charWeight > budget && curPage.length > 0) {
+    if (curHeight + nodeH > maxPageContentHeight && curPage.length > 0) {
       bookPages.push(curPage);
       curPage = [block];
-      curWeight = block.charWeight;
+      curHeight = nodeH;
     } else {
       curPage.push(block);
-      curWeight += block.charWeight;
+      curHeight += nodeH;
     }
   });
 
   if (curPage.length > 0) bookPages.push(curPage);
   if (bookPages.length === 0) bookPages.push([]);
+  measureBox.innerHTML = '';
 
   if (!preservePage) {
-    // Nếu có ghim, mở đúng trang chứa đoạn đang ghim
     const savedPin = localStorage.getItem('lumina_bookmark_data');
     if (savedPin) {
       try {
@@ -447,37 +560,49 @@ const buildBookPages = (preservePage = false) => {
   }
 
   bookPagerBar.classList.remove('hidden');
+  bookRunningHeader.classList.remove('hidden');
+  bookRunningFooter.classList.remove('hidden');
   tapZoneLeft.classList.remove('hidden');
   tapZoneRight.classList.remove('hidden');
   pageSlider.max = bookPages.length;
 
-  renderCurrentBookPage();
+  renderCurrentBookPage(null);
 };
 
-const renderCurrentBookPage = (direction = null) => {
+const renderCurrentBookPage = (direction = null, oldHtmlSnapshot = '') => {
   const pageBlocks = bookPages[currentPageIdx] || [];
-  readerContent.innerHTML = `<div class="chapter-block">${pageBlocks.map((b) => b.html).join('')}</div>`;
+  const newPageHtml = `<div class="chapter-block">${pageBlocks.map((b) => b.html).join('')}</div>`;
 
-  // Hiệu ứng lật trang
-  if (direction) {
-    const animClass =
-      flipAnimStyle === 'curl'
-        ? direction === 'next'
-          ? 'flip-curl-next'
-          : 'flip-curl-prev'
-        : direction === 'next'
-        ? 'flip-slide-next'
-        : 'flip-slide-prev';
-    readerContent.classList.remove('flip-slide-next', 'flip-slide-prev', 'flip-curl-next', 'flip-curl-prev');
-    void readerContent.offsetWidth;
-    readerContent.classList.add(animClass);
+  // Diễn hoạt tờ giấy 3D lật qua gáy sách
+  if (direction && oldHtmlSnapshot && !isTurningAnim) {
+    isTurningAnim = true;
+    playPaperRustle();
+
+    // Nếu lật tới (Next): Tờ giấy 3D giữ nội dung trang cũ và gập sang trái để lộ trang mới bên dưới
+    // Nếu lật lùi (Prev): Tờ giấy 3D giữ nội dung trang mới và hạ từ trái xuống đè lên trang cũ
+    leafFrontContent.innerHTML = direction === 'next' ? oldHtmlSnapshot : newPageHtml;
+    readerContent.innerHTML = newPageHtml;
+
+    turningLeaf.className = 'turning-leaf';
+    pageUnderShadow.classList.remove('shadow-fade-out');
+    void turningLeaf.offsetWidth;
+
+    const animClass = `anim-${flipAnimStyle}-${direction}`;
+    turningLeaf.classList.add(animClass);
+    pageUnderShadow.classList.add('shadow-fade-out');
+
+    const animDuration = flipAnimStyle === 'slide' ? 280 : 520;
+    setTimeout(() => {
+      turningLeaf.classList.add('hidden');
+      isTurningAnim = false;
+    }, animDuration);
+  } else {
+    readerContent.innerHTML = newPageHtml;
   }
 
-  // Chỉ hiện thẻ Kết thúc chương ở trang cuối cùng
   const isLastPage = currentPageIdx >= bookPages.length - 1;
   chapterEndCard.classList.toggle('hidden', !isLastPage);
 
-  // Cập nhật thanh phân trang
   const totalP = bookPages.length;
   const pct = Math.round(((currentPageIdx + 1) / totalP) * 100);
   pagerInfo.innerText = `Trang ${currentPageIdx + 1} / ${totalP}`;
@@ -485,19 +610,30 @@ const renderCurrentBookPage = (direction = null) => {
   btnPrevPage.disabled = currentPageIdx <= 0;
   btnNextPage.disabled = isLastPage;
 
+  // Cập nhật Header & Footer trên trang sách
+  const curChapTitle = pageBlocks[0]?.chapTitle || headerTitle.innerText;
+  runningChapTitle.innerText = curChapTitle;
+  runningChapMeta.innerText = `${pct}%`;
+  footerPageNum.innerText = `Trang ${currentPageIdx + 1} / ${totalP}`;
+
+  const pagesRemaining = totalP - (currentPageIdx + 1);
+  const minsLeft = Math.max(1, Math.ceil((pagesRemaining * 180) / 230));
+  footerTimeLeft.innerText = pagesRemaining === 0 ? 'Trang cuối chương' : `Còn ~${minsLeft} phút đọc`;
+
   progressFill.style.width = `${pct}%`;
   statPercent.innerText = `${pct}%`;
 
   restoreSavedMarker();
-  window.scrollTo({ top: 0, behavior: 'instant' });
 };
 
 const turnBookPage = (delta) => {
-  if (readingMode !== 'book') return;
+  if (readingMode !== 'book' || isTurningAnim) return;
   const nextIdx = currentPageIdx + delta;
   if (nextIdx < 0 || nextIdx >= bookPages.length) return;
+
+  const oldSnapshot = readerContent.innerHTML;
   currentPageIdx = nextIdx;
-  renderCurrentBookPage(delta > 0 ? 'next' : 'prev');
+  renderCurrentBookPage(delta > 0 ? 'next' : 'prev', oldSnapshot);
 };
 
 btnPrevPage.onclick = () => turnBookPage(-1);
@@ -506,13 +642,13 @@ tapZoneLeft.onclick = () => turnBookPage(-1);
 tapZoneRight.onclick = () => turnBookPage(1);
 pageSlider.oninput = (e) => {
   currentPageIdx = parseInt(e.target.value, 10) - 1;
-  renderCurrentBookPage();
+  renderCurrentBookPage(null);
 };
 
-// Cảm ứng Vuốt Trái / Phải trên iPhone để lật trang
+// Vuốt ngang trên màn hình iPhone để lật trang sách
 let touchStartX = 0;
 let touchStartY = 0;
-bookViewport.addEventListener(
+bookStage.addEventListener(
   'touchstart',
   (e) => {
     if (readingMode !== 'book') return;
@@ -522,13 +658,13 @@ bookViewport.addEventListener(
   { passive: true }
 );
 
-bookViewport.addEventListener(
+bookStage.addEventListener(
   'touchend',
   (e) => {
     if (readingMode !== 'book') return;
     const dx = e.changedTouches[0].screenX - touchStartX;
     const dy = e.changedTouches[0].screenY - touchStartY;
-    if (Math.abs(dx) > 52 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+    if (Math.abs(dx) > 46 && Math.abs(dx) > Math.abs(dy) * 1.3) {
       if (dx < 0) turnBookPage(1);
       else turnBookPage(-1);
     }
@@ -543,7 +679,7 @@ const setReadingMode = (mode) => {
   document.getElementById('btnModeScroll').classList.toggle('active', mode === 'scroll');
   document.getElementById('btnModeBook').classList.toggle('active', mode === 'book');
   document.getElementById('btnBookModeDock').classList.toggle('active', mode === 'book');
-  document.getElementById('btnQuickReadMode').innerText = mode === 'book' ? '📖 Sách' : '↕️ Cuộn';
+  document.getElementById('quickModeIcon').innerText = mode === 'book' ? '📖' : '↕️';
 
   if (isAutoScrolling && mode === 'book') stopAutoScroll();
   rebuildAndRender(true);
@@ -553,8 +689,9 @@ window.setReadingMode = setReadingMode;
 const setFlipAnimation = (style) => {
   flipAnimStyle = style;
   localStorage.setItem('lumina_flip_anim', style);
+  document.getElementById('btnAnimReal').classList.toggle('active', style === 'real');
+  document.getElementById('btnAnimPeel').classList.toggle('active', style === 'peel');
   document.getElementById('btnAnimSlide').classList.toggle('active', style === 'slide');
-  document.getElementById('btnAnimCurl').classList.toggle('active', style === 'curl');
 };
 window.setFlipAnimation = setFlipAnimation;
 
@@ -562,25 +699,22 @@ const jumpToChapter = (chapId, domChapId) => {
   if (readingMode === 'book') {
     const pIdx = bookPages.findIndex((p) => p.some((b) => b.chapId === chapId));
     if (pIdx !== -1) {
+      const oldSnap = readerContent.innerHTML;
       currentPageIdx = pIdx;
-      renderCurrentBookPage();
+      renderCurrentBookPage('next', oldSnap);
     }
   } else {
     document.getElementById(domChapId)?.scrollIntoView({ behavior: 'smooth' });
   }
 };
 
-// ---------------- GHIM TỪ ZERO-LAYOUT-SHIFT (FIX TRIỆT ĐỂ LỖI IPHONE) ----------------
+// ---------------- GHIM VỊ TRÍ ĐỌC GUTTER-PIN & LƯU TRÍCH DẪN ----------------
 const isWordChar = (char) => /[a-zA-Z0-9À-ỹ_]/.test(char);
 
 const findWordBounds = (text, clickOffset) => {
   let start = Math.min(clickOffset, text.length - 1);
   if (start < 0) return { start: 0, end: 0 };
-
-  // Nếu bấm trúng khoảng trắng, lùi về từ gần nhất
-  if (!isWordChar(text[start]) && start > 0 && isWordChar(text[start - 1])) {
-    start--;
-  }
+  if (!isWordChar(text[start]) && start > 0 && isWordChar(text[start - 1])) start--;
   let end = start;
   while (start > 0 && isWordChar(text[start - 1])) start--;
   while (end < text.length && isWordChar(text[end])) end++;
@@ -594,7 +728,6 @@ readerContent.addEventListener('click', (e) => {
 
   const index = parseInt(para.dataset.index, 10);
 
-  // Chạm lại vào đoạn đang ghim để huỷ ghim
   if (para.classList.contains('bookmarked')) {
     clearBookmarkData();
     showToast('Đã bỏ ghim vị trí đọc');
@@ -621,15 +754,12 @@ readerContent.addEventListener('click', (e) => {
   }
 
   let charOffset = 0;
-
   if (targetNode && targetNode.nodeType === Node.TEXT_NODE && para.contains(targetNode)) {
-    // Tính vị trí ký tự tuyệt đối trong đoạn trước khi bọc thẻ
     const baseOffset = getCharOffsetBeforeNode(targetNode, para);
     const { start, end } = findWordBounds(targetNode.nodeValue, targetOffset);
     charOffset = baseOffset + start;
     wrapWordAtNode(targetNode, start, end);
   } else {
-    charOffset = 0;
     highlightWordByCharOffset(para, 0);
   }
 
@@ -652,11 +782,9 @@ const getCharOffsetBeforeNode = (targetNode, root) => {
   return offset;
 };
 
-// Bọc đúng từ được chọn bằng <span class="pinned-word"> không chiếm chiều ngang phụ
 const wrapWordAtNode = (textNode, start, end) => {
   const val = textNode.nodeValue;
   if (end <= start || start >= val.length) return;
-
   const afterNode = textNode.splitText(start);
   afterNode.splitText(end - start);
 
@@ -682,7 +810,6 @@ const highlightWordByCharOffset = (para, charOffset) => {
   }
 };
 
-// Gỡ ghim và normalize() để gộp lại Text Node nguyên vẹn như ban đầu
 const clearBookmarkUI = () => {
   document.querySelectorAll('.pinned-word').forEach((span) => {
     const parent = span.parentNode;
@@ -712,14 +839,12 @@ const restoreSavedMarker = () => {
     currentParaIdx = index;
 
     const para = document.querySelector(`.para[data-index="${index}"]`);
-    if (!para) return; // Có thể đang ở trang khác trong chế độ Lật sách
+    if (!para) return;
 
     clearBookmarkUI();
     para.classList.add('bookmarked');
     highlightWordByCharOffset(para, charOffset || 0);
-  } catch (e) {
-    console.error(e);
-  }
+  } catch (e) {}
 };
 
 btnJumpBookmark.onclick = () => {
@@ -729,15 +854,59 @@ btnJumpBookmark.onclick = () => {
 
   if (readingMode === 'book') {
     const pIdx = bookPages.findIndex((p) => p.some((b) => b.paraIndex === index));
-    if (pIdx !== -1) {
+    if (pIdx !== -1 && pIdx !== currentPageIdx) {
+      const oldSnap = readerContent.innerHTML;
       currentPageIdx = pIdx;
-      renderCurrentBookPage();
+      renderCurrentBookPage('next', oldSnap);
     }
-  }
-  setTimeout(() => {
+  } else {
     const pinned = document.querySelector('.para.bookmarked');
     if (pinned) pinned.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, 60);
+  }
+};
+
+// Sổ tay Trích dẫn
+const buildQuotesUI = () => {
+  const list = JSON.parse(localStorage.getItem('lumina_quotes') || '[]');
+  quotesContainer.innerHTML =
+    list.length === 0
+      ? '<div style="color:var(--text-sub);font-size:12.5px;padding:6px;">Chưa có câu trích dẫn nào</div>'
+      : '';
+
+  list.forEach((q) => {
+    const row = document.createElement('div');
+    row.className = 'list-row-card';
+    row.innerHTML = `
+      <div class="list-row-info">
+        <strong style="white-space:normal; line-height:1.45;">"${q.text}"</strong>
+        <small>${q.chap}</small>
+      </div>
+      <button type="button" class="row-del-btn" title="Xoá trích dẫn">🗑️</button>
+    `;
+    row.querySelector('.row-del-btn').onclick = () => {
+      const updated = list.filter((item) => item.id !== q.id);
+      localStorage.setItem('lumina_quotes', JSON.stringify(updated));
+      buildQuotesUI();
+    };
+    quotesContainer.appendChild(row);
+  });
+};
+
+document.getElementById('btnSaveCurrentQuote').onclick = () => {
+  const block = allRenderBlocks.find((b) => b.paraIndex === currentParaIdx);
+  if (!block) {
+    showToast('Hãy ghim 📌 một đoạn văn trước');
+    return;
+  }
+  const list = JSON.parse(localStorage.getItem('lumina_quotes') || '[]');
+  list.unshift({
+    id: 'q-' + Date.now(),
+    text: block.rawText.length > 140 ? block.rawText.substring(0, 140) + '...' : block.rawText,
+    chap: block.chapTitle
+  });
+  localStorage.setItem('lumina_quotes', JSON.stringify(list.slice(0, 30)));
+  buildQuotesUI();
+  showToast('⭐ Đã lưu vào Sổ tay trích dẫn');
 };
 
 // ---------------- NẠP / THÊM / TẮT CHƯƠNG ----------------
@@ -771,7 +940,7 @@ const commitTextAndRead = () => {
 };
 
 const closeCurrentAndOpenBlank = () => {
-  if (ttsActive) toggleTTS();
+  if (ttsActive) stopTTS();
   if (isAutoScrolling) stopAutoScroll();
 
   chaptersList = [];
@@ -781,7 +950,6 @@ const closeCurrentAndOpenBlank = () => {
   localStorage.removeItem('lumina_scroll_pos');
 
   rebuildAndRender();
-
   progressFill.style.width = '0%';
   statPercent.innerText = '0%';
 
@@ -799,16 +967,14 @@ const closeCurrentAndPasteClipboard = async () => {
   try {
     const clip = await navigator.clipboard.readText();
     if (clip && clip.trim()) {
-      if (ttsActive) toggleTTS();
+      if (ttsActive) stopTTS();
       if (isAutoScrolling) stopAutoScroll();
       isAppendMode = false;
       textInput.value = clip.trim();
       commitTextAndRead();
       return;
     }
-  } catch (e) {
-    // Fallback mở ô trống nếu iOS yêu cầu quyền dán thủ công
-  }
+  } catch (e) {}
   closeCurrentAndOpenBlank();
   showToast('Hãy chạm Dán vào ô trống');
 };
@@ -827,7 +993,6 @@ const updateComposerBadge = () => {
     : '📖 Chèn chương mới (Thay thế)';
 };
 
-// Xuất file .txt sạch
 document.getElementById('btnExportTxt').onclick = () => {
   if (chaptersList.length === 0) {
     showToast('Chưa có nội dung để xuất');
@@ -844,7 +1009,7 @@ document.getElementById('btnExportTxt').onclick = () => {
   showToast('Đã tải xuống file .txt');
 };
 
-// ---------------- QUẢN LÝ LỊCH SỬ (XOÁ TỪNG MỤC HOẶC TẤT CẢ) ----------------
+// ---------------- LỊCH SỬ ĐỌC ----------------
 const saveHistoryRecord = (title, content) => {
   let list = JSON.parse(localStorage.getItem('lumina_histories') || '[]');
   list = list.filter((h) => h.content !== content);
@@ -874,7 +1039,7 @@ const buildHistoryUI = () => {
   const list = JSON.parse(localStorage.getItem('lumina_histories') || '[]');
   historyContainer.innerHTML =
     list.length === 0
-      ? '<div style="color:var(--text-sub);font-size:13px;padding:8px;">Chưa có lịch sử</div>'
+      ? '<div style="color:var(--text-sub);font-size:12.5px;padding:6px;">Chưa có lịch sử</div>'
       : '';
 
   list.forEach((item) => {
@@ -929,11 +1094,8 @@ const performSearch = () => {
   });
 
   searchMatches = Array.from(document.querySelectorAll('.search-hit'));
-  if (searchMatches.length > 0) {
-    focusSearchMatch(0);
-  } else {
-    searchCount.innerText = '0/0';
-  }
+  if (searchMatches.length > 0) focusSearchMatch(0);
+  else searchCount.innerText = '0/0';
 };
 
 const focusSearchMatch = (idx) => {
@@ -1011,7 +1173,7 @@ document.getElementById('btnSpeedDown').onclick = () => {
 };
 document.getElementById('btnStopScrollHud').onclick = stopAutoScroll;
 
-// ---------------- ĐỌC GIỌNG NÓI (TTS) & HẸN GIỜ NGỦ ----------------
+// ---------------- ĐỌC GIỌNG NÓI (TTS) ----------------
 const toggleTTS = () => {
   if (ttsActive) {
     stopTTS();
@@ -1035,12 +1197,12 @@ const stopTTS = () => {
 const playSpeech = (idx) => {
   if (!ttsActive) return;
 
-  // Nếu ở chế độ Lật sách và đoạn cần đọc nằm ở trang khác, tự lật sang trang đó
   if (readingMode === 'book') {
     const targetPage = bookPages.findIndex((p) => p.some((b) => b.paraIndex === idx));
     if (targetPage !== -1 && targetPage !== currentPageIdx) {
+      const oldSnap = readerContent.innerHTML;
       currentPageIdx = targetPage;
-      renderCurrentBookPage('next');
+      renderCurrentBookPage('next', oldSnap);
     }
   }
 
@@ -1059,7 +1221,6 @@ const playSpeech = (idx) => {
   const utter = new SpeechSynthesisUtterance(target.innerText);
   utter.lang = 'vi-VN';
   utter.rate = ttsRate;
-
   document.getElementById('ttsStatusLabel').innerText = `Câu #${idx + 1}`;
 
   utter.onend = () => {
@@ -1090,9 +1251,8 @@ document.getElementById('btnTtsStop').onclick = stopTTS;
 
 btnTtsRate.onclick = () => {
   const rates = [0.8, 1.0, 1.2, 1.4, 1.6];
-  const next = rates[(rates.indexOf(ttsRate) + 1) % rates.length] || 1.0;
-  ttsRate = next;
-  btnTtsRate.innerText = `${next.toFixed(1)}x`;
+  ttsRate = rates[(rates.indexOf(ttsRate) + 1) % rates.length] || 1.0;
+  btnTtsRate.innerText = `${ttsRate.toFixed(1)}x`;
   if (ttsActive) {
     synth.cancel();
     playSpeech(currentParaIdx);
@@ -1105,7 +1265,7 @@ btnSleepTimer.onclick = () => {
   clearTimeout(sleepTimeoutId);
 
   if (sleepTimerMinutes === 0) {
-    btnSleepTimer.innerText = '🌙 Tắt hẹn giờ';
+    btnSleepTimer.innerText = '🌙 Hẹn giờ';
     showToast('Đã tắt hẹn giờ ngủ');
   } else {
     btnSleepTimer.innerText = `🌙 ${sleepTimerMinutes}p`;
@@ -1113,8 +1273,9 @@ btnSleepTimer.onclick = () => {
     sleepTimeoutId = setTimeout(() => {
       if (ttsActive) stopTTS();
       if (isAutoScrolling) stopAutoScroll();
+      stopAmbienceAudio();
       sleepTimerMinutes = 0;
-      btnSleepTimer.innerText = '🌙 Tắt hẹn giờ';
+      btnSleepTimer.innerText = '🌙 Hẹn giờ';
     }, sleepTimerMinutes * 60000);
   }
 };
@@ -1137,11 +1298,12 @@ window.applyTheme = applyTheme;
 
 const applyCustomColor = (cssVar, val, key) => {
   document.documentElement.style.setProperty(cssVar, val);
+  if (cssVar === '--bg') document.documentElement.style.setProperty('--bg-page', val);
   localStorage.setItem(key, val);
 };
 
 const resetCustomColors = () => {
-  ['--bg', '--text-main', '--dialogue', '--chapter'].forEach((p) =>
+  ['--bg', '--bg-page', '--text-main', '--dialogue', '--chapter'].forEach((p) =>
     document.documentElement.style.removeProperty(p)
   );
   localStorage.removeItem('lumina_custom_bg');
@@ -1179,6 +1341,7 @@ const applyFont = (type) => {
   document.getElementById('btnFontLora').classList.toggle('active', type === 'lora');
   document.getElementById('btnFontSerif').classList.toggle('active', type === 'serif');
   localStorage.setItem('lumina_font', type);
+  if (readingMode === 'book') buildExactBookPages(true);
 };
 window.applyFont = applyFont;
 
@@ -1188,7 +1351,7 @@ const stepFontSize = (delta) => {
   document.documentElement.style.setProperty('--font-size', cur + 'px');
   document.getElementById('lblFontSize').innerText = cur + 'px';
   localStorage.setItem('lumina_font_size', cur);
-  if (readingMode === 'book') buildBookPages(true);
+  if (readingMode === 'book') buildExactBookPages(true);
 };
 window.stepFontSize = stepFontSize;
 
@@ -1198,16 +1361,17 @@ const stepLineHeight = (delta) => {
   document.documentElement.style.setProperty('--line-height', cur);
   document.getElementById('lblLineHeight').innerText = cur;
   localStorage.setItem('lumina_line_height', cur);
-  if (readingMode === 'book') buildBookPages(true);
+  if (readingMode === 'book') buildExactBookPages(true);
 };
 window.stepLineHeight = stepLineHeight;
 
 const stepParaGap = (delta) => {
-  let cur = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--para-gap')) || 1.2;
+  let cur = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--para-gap')) || 1.1;
   cur = Math.min(2.4, Math.max(0.6, +(cur + delta).toFixed(1)));
   document.documentElement.style.setProperty('--para-gap', cur + 'em');
   document.getElementById('lblParaGap').innerText = cur + 'em';
   localStorage.setItem('lumina_para_gap', cur);
+  if (readingMode === 'book') buildExactBookPages(true);
 };
 window.stepParaGap = stepParaGap;
 
@@ -1233,7 +1397,7 @@ window.toggleDropCap = toggleDropCap;
 const applyWidth = (w) => {
   document.documentElement.style.setProperty('--content-width', w);
   localStorage.setItem('lumina_width', w);
-  if (readingMode === 'book') buildBookPages(true);
+  if (readingMode === 'book') buildExactBookPages(true);
 };
 window.applyWidth = applyWidth;
 
@@ -1339,12 +1503,12 @@ document.getElementById('btnDockInput').onclick = () => {
 
 document.getElementById('btnBookModeDock').onclick = () => {
   setReadingMode(readingMode === 'book' ? 'scroll' : 'book');
-  showToast(readingMode === 'book' ? '📖 Chế độ Lật trang sách' : '↕️ Chế độ Cuộn dọc');
+  showToast(readingMode === 'book' ? '📖 Chế độ Lật trang sách 3D' : '↕️ Chế độ Cuộn dọc');
 };
 
 document.getElementById('btnQuickReadMode').onclick = () => {
   setReadingMode(readingMode === 'book' ? 'scroll' : 'book');
-  showToast(readingMode === 'book' ? '📖 Chế độ Lật trang sách' : '↕️ Chế độ Cuộn dọc');
+  showToast(readingMode === 'book' ? '📖 Chế độ Lật trang sách 3D' : '↕️ Chế độ Cuộn dọc');
 };
 
 btnCancelComposer.onclick = () => inputSheet.classList.add('hidden');
@@ -1387,8 +1551,9 @@ document.getElementById('btnClearHistory').onclick = () => {
 document.getElementById('btnScrollTop').onclick = () => {
   closeAllOverlays();
   if (readingMode === 'book') {
+    const oldSnap = readerContent.innerHTML;
     currentPageIdx = 0;
-    renderCurrentBookPage('prev');
+    renderCurrentBookPage('prev', oldSnap);
   } else {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -1403,7 +1568,6 @@ textInput.addEventListener('paste', () => {
   }, 60);
 });
 
-// Phím tắt bàn phím (Hỗ trợ mũi tên Trái/Phải để lật trang sách)
 window.addEventListener('keydown', (e) => {
   if (
     document.activeElement === textInput ||
@@ -1438,7 +1602,6 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-// Tự ẩn thanh điều hướng khi cuộn dọc
 window.addEventListener(
   'scroll',
   () => {
@@ -1465,6 +1628,15 @@ window.addEventListener(
   { passive: true }
 );
 
+// Tự tính lại trang sách nếu người dùng xoay ngang/dọc màn hình iPhone
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  if (readingMode === 'book' && chaptersList.length > 0) {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => buildExactBookPages(true), 180);
+  }
+});
+
 // ---------------- KHỞI TẠO ----------------
 window.addEventListener('DOMContentLoaded', () => {
   isDropCap = localStorage.getItem('lumina_dropcap') !== 'false';
@@ -1473,21 +1645,30 @@ window.addEventListener('DOMContentLoaded', () => {
   dropBtn.innerText = isDropCap ? 'Chữ hoa đầu chương: Bật' : 'Chữ hoa đầu chương: Tắt';
   dropBtn.classList.toggle('active', isDropCap);
 
+  isFlipSoundOn = localStorage.getItem('lumina_flip_sound') === 'true';
+  document.getElementById('btnFlipSound').innerText = isFlipSoundOn
+    ? '🔊 Tiếng lật giấy: Bật'
+    : '🔊 Tiếng lật giấy: Tắt';
+  document.getElementById('btnFlipSound').classList.toggle('active', isFlipSoundOn);
+
   readingMode = localStorage.getItem('lumina_read_mode') || 'scroll';
   document.getElementById('btnModeScroll').classList.toggle('active', readingMode === 'scroll');
   document.getElementById('btnModeBook').classList.toggle('active', readingMode === 'book');
   document.getElementById('btnBookModeDock').classList.toggle('active', readingMode === 'book');
-  document.getElementById('btnQuickReadMode').innerText = readingMode === 'book' ? '📖 Sách' : '↕️ Cuộn';
+  document.getElementById('quickModeIcon').innerText = readingMode === 'book' ? '📖' : '↕️';
 
-  flipAnimStyle = localStorage.getItem('lumina_flip_anim') || 'slide';
-  document.getElementById('btnAnimSlide').classList.toggle('active', flipAnimStyle === 'slide');
-  document.getElementById('btnAnimCurl').classList.toggle('active', flipAnimStyle === 'curl');
+  flipAnimStyle = localStorage.getItem('lumina_flip_anim') || 'real';
+  setFlipAnimation(flipAnimStyle);
 
   const savedTheme = localStorage.getItem('lumina_theme') || 'theme-dark';
   applyTheme(savedTheme);
 
   const cBg = localStorage.getItem('lumina_custom_bg');
-  if (cBg) { document.documentElement.style.setProperty('--bg', cBg); pickerBg.value = cBg; }
+  if (cBg) {
+    document.documentElement.style.setProperty('--bg', cBg);
+    document.documentElement.style.setProperty('--bg-page', cBg);
+    pickerBg.value = cBg;
+  }
   const cTxt = localStorage.getItem('lumina_custom_text');
   if (cTxt) { document.documentElement.style.setProperty('--text-main', cTxt); pickerText.value = cTxt; }
   const cDia = localStorage.getItem('lumina_custom_dialogue');
@@ -1560,6 +1741,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (savedRules) replaceInput.value = savedRules;
 
   buildHistoryUI();
+  buildQuotesUI();
 
   const lastText = localStorage.getItem('lumina_saved_text');
   if (lastText) {

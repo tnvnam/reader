@@ -1,14 +1,15 @@
 /* ==========================================================================
-   LUMINA READER STUDIO — EDITORIAL & BOOK FLIP DESIGN SYSTEM
+   LUMINA READER STUDIO — REAL 3D BOOK TURN & IPHONE SAFE-AREA DESIGN
    ========================================================================== */
 
 :root {
   --bg: #0d0f14;
-  --bg-elevated: rgba(22, 25, 34, 0.88);
+  --bg-page: #13161f;
+  --bg-elevated: rgba(22, 25, 34, 0.9);
   --bg-solid: #161922;
-  --surface: rgba(255, 255, 255, 0.045);
-  --surface-hover: rgba(255, 255, 255, 0.085);
-  --border: rgba(255, 255, 255, 0.085);
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-hover: rgba(255, 255, 255, 0.09);
+  --border: rgba(255, 255, 255, 0.09);
   
   --text-main: #e2e8f0;
   --text-muted: #94a3b8;
@@ -29,7 +30,7 @@
 
   --font-size: 20px;
   --line-height: 1.9;
-  --para-gap: 1.2em;
+  --para-gap: 1.1em;
   --text-align: justify;
   --content-width: 760px;
   --column-count: 1;
@@ -40,11 +41,12 @@
 
 body.theme-oled {
   --bg: #000000;
-  --bg-elevated: rgba(16, 16, 18, 0.9);
+  --bg-page: #070709;
+  --bg-elevated: rgba(16, 16, 18, 0.92);
   --bg-solid: #101012;
-  --surface: rgba(255, 255, 255, 0.04);
-  --surface-hover: rgba(255, 255, 255, 0.08);
-  --border: rgba(255, 255, 255, 0.09);
+  --surface: rgba(255, 255, 255, 0.045);
+  --surface-hover: rgba(255, 255, 255, 0.085);
+  --border: rgba(255, 255, 255, 0.1);
   --text-main: #f4f4f5;
   --text-muted: #a1a1aa;
   --text-sub: #52525b;
@@ -55,12 +57,13 @@ body.theme-oled {
 }
 
 body.theme-sepia {
-  --bg: #f5ebe0;
-  --bg-elevated: rgba(237, 224, 212, 0.9);
+  --bg: #eadbc8;
+  --bg-page: #f5ebe0;
+  --bg-elevated: rgba(237, 224, 212, 0.92);
   --bg-solid: #ede0d4;
-  --surface: rgba(67, 40, 24, 0.05);
-  --surface-hover: rgba(67, 40, 24, 0.09);
-  --border: rgba(67, 40, 24, 0.12);
+  --surface: rgba(67, 40, 24, 0.055);
+  --surface-hover: rgba(67, 40, 24, 0.095);
+  --border: rgba(67, 40, 24, 0.13);
   --text-main: #2b2118;
   --text-muted: #6f5e53;
   --text-sub: #9c8978;
@@ -68,16 +71,17 @@ body.theme-sepia {
   --dialogue: #b45309;
   --accent: #b45309;
   --accent-glow: rgba(180, 83, 9, 0.2);
-  --shadow-lg: 0 18px 40px rgba(67, 40, 24, 0.15);
+  --shadow-lg: 0 18px 40px rgba(67, 40, 24, 0.16);
 }
 
 body.theme-paper {
-  --bg: #fcfcfc;
-  --bg-elevated: rgba(244, 244, 246, 0.9);
+  --bg: #eef0f4;
+  --bg-page: #ffffff;
+  --bg-elevated: rgba(244, 244, 246, 0.92);
   --bg-solid: #f4f4f6;
-  --surface: rgba(0, 0, 0, 0.04);
-  --surface-hover: rgba(0, 0, 0, 0.075);
-  --border: rgba(0, 0, 0, 0.09);
+  --surface: rgba(0, 0, 0, 0.045);
+  --surface-hover: rgba(0, 0, 0, 0.08);
+  --border: rgba(0, 0, 0, 0.1);
   --text-main: #18181b;
   --text-muted: #52525b;
   --text-sub: #71717a;
@@ -89,12 +93,13 @@ body.theme-paper {
 }
 
 body.theme-forest {
-  --bg: #0a1612;
-  --bg-elevated: rgba(16, 33, 27, 0.88);
+  --bg: #07100d;
+  --bg-page: #0c1a15;
+  --bg-elevated: rgba(16, 33, 27, 0.9);
   --bg-solid: #10211b;
-  --surface: rgba(255, 255, 255, 0.04);
-  --surface-hover: rgba(255, 255, 255, 0.08);
-  --border: rgba(255, 255, 255, 0.08);
+  --surface: rgba(255, 255, 255, 0.045);
+  --surface-hover: rgba(255, 255, 255, 0.085);
+  --border: rgba(255, 255, 255, 0.09);
   --text-main: #e2f1ec;
   --text-muted: #82a89c;
   --text-sub: #4b6b61;
@@ -105,12 +110,13 @@ body.theme-forest {
 }
 
 body.theme-rose {
-  --bg: #191724;
-  --bg-elevated: rgba(31, 29, 46, 0.88);
+  --bg: #14121d;
+  --bg-page: #191724;
+  --bg-elevated: rgba(31, 29, 46, 0.9);
   --bg-solid: #1f1d2e;
   --surface: rgba(255, 255, 255, 0.045);
   --surface-hover: rgba(255, 255, 255, 0.085);
-  --border: rgba(224, 222, 244, 0.09);
+  --border: rgba(224, 222, 244, 0.1);
   --text-main: #e0def4;
   --text-muted: #908caa;
   --text-sub: #6e6a86;
@@ -146,8 +152,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: calc(env(safe-area-inset-top, 0px) + 64px);
-  padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 110px);
+  padding-top: calc(max(10px, env(safe-area-inset-top, 10px)) + 58px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 18px) + 104px);
+  overflow-x: hidden;
 }
 
 .hidden {
@@ -183,7 +190,7 @@ body {
 /* Toast Notification */
 .toast-pill {
   position: fixed;
-  top: calc(env(safe-area-inset-top, 12px) + 62px);
+  top: calc(max(12px, env(safe-area-inset-top, 12px)) + 60px);
   left: 50%;
   transform: translate(-50%, -20px);
   background: var(--bg-solid);
@@ -206,26 +213,28 @@ body {
   transform: translate(-50%, 0);
 }
 
-/* ---------------- TOP ZEN HEADER ---------------- */
+/* ---------------- TOP ZEN HEADER (FIX TRIỆT ĐỂ LỖI CHỒNG NÚT TRÊN IPHONE) ---------------- */
 .zen-header {
   position: fixed;
-  top: env(safe-area-inset-top, 0px);
+  top: 0;
   left: 0;
   right: 0;
   z-index: 950;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8px 12px 0;
+  /* Đệm an toàn cho tai thỏ / Dynamic Island / Thanh pin của iPhone */
+  padding: max(10px, calc(env(safe-area-inset-top, 0px) + 6px)) 12px 0;
   pointer-events: none;
   transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s ease;
 }
 
 .zen-header.bar-hidden {
-  transform: translateY(-120%);
+  transform: translateY(-130%);
   opacity: 0;
 }
 
+/* Grid 3 cột tách biệt hoàn toàn nút 3 gạch (☰) khỏi cụm nút bên phải */
 .zen-header-inner {
   pointer-events: auto;
   width: 100%;
@@ -235,29 +244,25 @@ body {
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border);
   border-radius: 999px;
-  padding: 6px 10px;
-  display: flex;
-  justify-content: space-between;
+  padding: 5px 8px;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 6px;
-  box-shadow: 0 8px 28px -6px rgba(0, 0, 0, 0.25);
-}
-
-.header-left, .header-right {
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  gap: 8px;
+  box-shadow: 0 8px 28px -6px rgba(0, 0, 0, 0.3);
 }
 
 .header-left {
-  min-width: 0;
-  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.header-title-wrap {
+.header-center {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  overflow: hidden;
 }
 
 .app-brand {
@@ -272,12 +277,21 @@ body {
 
 .reading-meta {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--text-muted);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.icon-pill-btn {
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.icon-circle-btn {
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -289,47 +303,43 @@ body {
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
+  font-size: 14px;
+  padding: 0;
+  transition: transform 0.12s ease, background 0.15s;
 }
 
-.icon-pill-btn svg {
+.icon-circle-btn:active {
+  transform: scale(0.92);
+}
+
+.icon-circle-btn svg {
   width: 16px;
   height: 16px;
-  stroke-width: 2;
+  stroke-width: 2.2;
 }
 
-.action-pill-btn {
-  font-family: var(--font-sans);
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text-main);
-  cursor: pointer;
-  white-space: nowrap;
+.icon-circle-btn.pin-btn {
+  border-color: var(--marker);
+  background: rgba(56, 189, 248, 0.14);
 }
 
-.action-pill-btn.accent {
+.icon-circle-btn.accent-btn {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
 }
 
-.action-pill-btn.pin-jump {
-  border-color: var(--marker);
-  color: var(--marker);
-}
-
 .progress-pill {
   font-family: var(--font-sans);
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 700;
-  padding: 4px 8px;
+  padding: 5px 8px;
   border-radius: 999px;
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text-main);
+  min-width: 38px;
+  text-align: center;
 }
 
 /* Search Bar Panel */
@@ -399,7 +409,7 @@ body {
 .reader-container {
   width: 100%;
   max-width: var(--content-width);
-  padding: 12px 20px 40px;
+  padding: 8px 14px 30px;
 }
 
 .composer-card {
@@ -407,7 +417,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 22px;
   padding: 16px;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   box-shadow: var(--shadow-lg);
   font-family: var(--font-sans);
 }
@@ -457,11 +467,6 @@ body {
   background: var(--surface);
   color: var(--text-main);
   cursor: pointer;
-  transition: transform 0.12s ease;
-}
-
-.tool-btn:active {
-  transform: scale(0.95);
 }
 
 .tool-btn.paste {
@@ -477,7 +482,7 @@ body {
 
 .textarea-shell textarea {
   width: 100%;
-  height: 165px;
+  height: 160px;
   background: var(--surface);
   color: var(--text-main);
   border: 1px solid var(--border);
@@ -488,10 +493,6 @@ body {
   line-height: 1.55;
   resize: vertical;
   outline: none;
-}
-
-.textarea-shell textarea:focus {
-  border-color: var(--accent);
 }
 
 .composer-footer {
@@ -527,13 +528,250 @@ body {
   box-shadow: 0 6px 20px var(--accent-glow);
 }
 
-/* ---------------- EDITORIAL TYPOGRAPHY & ZERO-SHIFT PIN ---------------- */
-.book-viewport {
+/* ==========================================================================
+   REAL 3D BOOK STAGE & REALISTIC PAGE TURN ENGINE
+   ========================================================================== */
+.book-stage {
   position: relative;
   width: 100%;
-  perspective: 1400px;
+  perspective: 2200px;
 }
 
+.book-sheet {
+  position: relative;
+  width: 100%;
+  transition: background-color 0.25s ease;
+}
+
+.book-spine-shadow,
+.page-under-shadow {
+  display: none;
+}
+
+/* Giao diện Trang Sách Thật khi bật chế độ Lật Sách (mode-book) */
+body.mode-book .book-sheet {
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  border-radius: 6px 16px 16px 6px;
+  padding: 16px 20px 18px 24px;
+  min-height: calc(100dvh - 200px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  /* Hiệu ứng các lớp giấy xếp chồng bên mép phải cuốn sách */
+  box-shadow:
+    3px 0 0 -1px var(--bg-page),
+    4px 0 0 -1px var(--border),
+    6px 0 0 -2px var(--bg-page),
+    7px 0 0 -2px var(--border),
+    0 22px 48px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Bóng gáy sách bên trái */
+body.mode-book .book-spine-shadow {
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 28px;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.28) 0%,
+    rgba(0, 0, 0, 0.08) 45%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 6;
+}
+
+/* Bóng đổ phủ lên trang dưới khi trang trên đang lật */
+body.mode-book .page-under-shadow {
+  display: block;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.35), transparent 65%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+body.mode-book .page-under-shadow.shadow-fade-out {
+  animation: underShadowOut 0.52s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes underShadowOut {
+  0% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+/* Tiêu đề đầu trang & Số trang cuối trang sách */
+.book-running-header,
+.book-running-footer {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--text-sub);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+
+.book-running-header {
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.book-running-footer {
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+/* Tờ giấy 3D lật qua bản lề gáy sách */
+.turning-leaf {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-page);
+  padding: 42px 20px 38px 24px;
+  border-radius: 6px 16px 16px 6px;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  z-index: 15;
+  pointer-events: none;
+  overflow: hidden;
+  will-change: transform, box-shadow;
+}
+
+.leaf-front {
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.leaf-crease-gradient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.22) 0%,
+    rgba(255, 255, 255, 0.06) 28%,
+    rgba(0, 0, 0, 0.18) 88%,
+    rgba(0, 0, 0, 0.38) 100%
+  );
+  opacity: 0;
+}
+
+/* 1. Kiểu Lật giấy 3D Thật (Real 3D Book Leaf Turn) */
+.turning-leaf.anim-real-next {
+  animation: realPageTurnNext 0.54s cubic-bezier(0.32, 0.08, 0.24, 1) forwards;
+}
+.turning-leaf.anim-real-next .leaf-crease-gradient {
+  animation: creaseSweep 0.54s ease-in-out forwards;
+}
+
+.turning-leaf.anim-real-prev {
+  animation: realPageTurnPrev 0.52s cubic-bezier(0.22, 0.68, 0.32, 1) forwards;
+}
+.turning-leaf.anim-real-prev .leaf-crease-gradient {
+  animation: creaseSweep 0.52s ease-in-out forwards;
+}
+
+@keyframes realPageTurnNext {
+  0% {
+    transform: rotateY(0deg) skewY(0deg);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    opacity: 1;
+  }
+  45% {
+    transform: rotateY(-78deg) skewY(-1.8deg);
+    box-shadow: -28px 0 45px rgba(0, 0, 0, 0.48);
+    opacity: 1;
+  }
+  100% {
+    transform: rotateY(-165deg) skewY(0deg);
+    box-shadow: -5px 0 18px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+  }
+}
+
+@keyframes realPageTurnPrev {
+  0% {
+    transform: rotateY(-150deg) skewY(1.8deg);
+    box-shadow: -10px 0 25px rgba(0, 0, 0, 0.25);
+    opacity: 0.35;
+  }
+  55% {
+    transform: rotateY(-45deg) skewY(-1.2deg);
+    box-shadow: 28px 0 45px rgba(0, 0, 0, 0.48);
+    opacity: 1;
+  }
+  100% {
+    transform: rotateY(0deg) skewY(0deg);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes creaseSweep {
+  0% { opacity: 0.1; }
+  50% { opacity: 0.95; }
+  100% { opacity: 0.2; }
+}
+
+/* 2. Kiểu Cuốn mép sách (Page Peel) */
+.turning-leaf.anim-peel-next {
+  animation: peelPageNext 0.46s cubic-bezier(0.32, 0.08, 0.24, 1) forwards;
+}
+.turning-leaf.anim-peel-prev {
+  animation: peelPagePrev 0.46s cubic-bezier(0.22, 0.68, 0.32, 1) forwards;
+}
+
+@keyframes peelPageNext {
+  0% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transform: translateX(0) rotateZ(0deg);
+    box-shadow: -10px 0 25px rgba(0,0,0,0.3);
+  }
+  100% {
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+    transform: translateX(-35%) rotateZ(-2deg);
+    box-shadow: -35px 0 50px rgba(0,0,0,0.55);
+  }
+}
+
+@keyframes peelPagePrev {
+  0% {
+    clip-path: polygon(0 0, 8% 0, 0 100%, 0 100%);
+    transform: translateX(-25%);
+  }
+  100% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transform: translateX(0);
+  }
+}
+
+/* 3. Kiểu Trượt Kindle (Smooth Slide) */
+.turning-leaf.anim-slide-next {
+  animation: slideLeafOut 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.turning-leaf.anim-slide-prev {
+  animation: slideLeafIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes slideLeafOut {
+  0% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(-100%); opacity: 0.2; }
+}
+@keyframes slideLeafIn {
+  0% { transform: translateX(-100%); opacity: 0.4; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+/* ---------------- TYPOGRAPHY & GUTTER PIN (KHÔNG ĐẨY CHỮ, KHÔNG ĐÈ HEADER) ---------------- */
 #reader-content {
   line-height: var(--line-height);
   font-size: var(--font-size);
@@ -541,46 +779,14 @@ body {
   word-break: break-word;
   column-count: var(--column-count);
   column-gap: 48px;
-  transform-origin: left center;
+  flex: 1;
 }
 
-/* Hiệu ứng Lật trang sách (Book Flip Animations) */
-#reader-content.flip-slide-next {
-  animation: slideNext 0.26s cubic-bezier(0.22, 1, 0.36, 1);
-}
-#reader-content.flip-slide-prev {
-  animation: slidePrev 0.26s cubic-bezier(0.22, 1, 0.36, 1);
-}
-#reader-content.flip-curl-next {
-  animation: curlNext 0.36s cubic-bezier(0.22, 1, 0.36, 1);
-}
-#reader-content.flip-curl-prev {
-  animation: curlPrev 0.36s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes slideNext {
-  0% { opacity: 0.25; transform: translateX(34px); }
-  100% { opacity: 1; transform: translateX(0); }
-}
-@keyframes slidePrev {
-  0% { opacity: 0.25; transform: translateX(-34px); }
-  100% { opacity: 1; transform: translateX(0); }
-}
-@keyframes curlNext {
-  0% { opacity: 0.3; transform: rotateY(-18deg) scale(0.98); }
-  100% { opacity: 1; transform: rotateY(0deg) scale(1); }
-}
-@keyframes curlPrev {
-  0% { opacity: 0.3; transform: rotateY(18deg) scale(0.98); }
-  100% { opacity: 1; transform: rotateY(0deg) scale(1); }
-}
-
-/* Đã loại bỏ hoàn toàn content-visibility:auto để chống mất chữ trên iPhone */
 .para {
   color: var(--text-main);
   margin: 0 0 var(--para-gap) 0;
-  text-indent: 1.6em;
-  padding: 4px 10px;
+  text-indent: 1.5em;
+  padding: 3px 8px 3px 12px;
   border-radius: 8px;
   border-left: 3px solid transparent;
   cursor: pointer;
@@ -593,14 +799,14 @@ body {
   background-color: var(--surface);
 }
 
-/* Drop Cap đầu chương */
+/* Chữ cái đầu chương in hoa nghệ thuật (Drop Cap) */
 body.dropcap-on .chapter-block > .para.first-of-chap {
   text-indent: 0;
 }
 
 body.dropcap-on .chapter-block > .para.first-of-chap::first-letter {
   float: left;
-  font-size: 3em;
+  font-size: 2.95em;
   line-height: 0.85;
   padding-right: 10px;
   padding-top: 4px;
@@ -617,31 +823,47 @@ body.dropcap-on .chapter-block > .para.first-of-chap::first-letter {
   font-weight: 700;
 }
 
-/* ZERO-LAYOUT-SHIFT PIN (Không chiếm diện tích ngang, không bao giờ đẩy/mất chữ trên iPhone) */
-.para.bookmarked {
-  border-left-color: var(--marker) !important;
-  background: rgba(56, 189, 248, 0.06) !important;
+/* GHIM VỊ TRÍ ĐỌC GUTTER-PIN (Không đẩy dòng, z-index thấp không bao giờ chồng lên nút 3 gạch) */
+/* Khóa tầng hiển thị để ghim 📌 luôn nằm dưới thanh Header (nút 3 gạch) khi cuộn */
+.book-stage {
+  position: relative;
+  width: 100%;
+  perspective: 2200px;
+  isolation: isolate;
+  z-index: 1;
 }
 
+/* Đoạn văn đang có ghim */
+.para.bookmarked {
+  border-left-color: var(--marker) !important;
+  background: rgba(56, 189, 248, 0.065) !important;
+}
+
+/* Tô sáng từ được ghim & neo cố định khung tọa độ cho iPhone */
 .pinned-word {
   position: relative;
+  display: inline-block;
+  text-indent: 0 !important;
   background: rgba(56, 189, 248, 0.24);
   border-bottom: 2px solid var(--marker);
   border-radius: 3px;
+  padding: 0 1px;
 }
 
+/* Biểu tượng 📌 nằm ngay trên từ được tô sáng, không chiếm diện tích dòng */
 .pinned-word::after {
   content: "📌";
   position: absolute;
-  bottom: 95%;
+  bottom: calc(100% - 3px);
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.78em;
+  font-size: 0.76em;
   line-height: 1;
+  text-indent: 0 !important;
   pointer-events: none;
   user-select: none;
   white-space: nowrap;
-  z-index: 10;
+  z-index: 3;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
   animation: floatPin 2s infinite ease-in-out;
 }
@@ -650,6 +872,7 @@ body.dropcap-on .chapter-block > .para.first-of-chap::first-letter {
   0%, 100% { transform: translate(-50%, 0); }
   50% { transform: translate(-50%, -3px); }
 }
+
 
 .para.speaking {
   border-left-color: var(--accent) !important;
@@ -667,7 +890,6 @@ body.dropcap-on .chapter-block > .para.first-of-chap::first-letter {
   color: #fff;
 }
 
-/* Chế độ Đèn rọi tập trung */
 body.spotlight-on .para {
   opacity: 0.22;
 }
@@ -678,17 +900,21 @@ body.spotlight-on .para:hover {
 
 /* Tiêu đề chương + Nút Xoá từng chương trực tiếp */
 .chapter-header-wrap {
-  margin: 44px 0 26px 0;
+  margin: 28px 0 22px 0;
   text-align: center;
   column-span: all;
   scroll-margin-top: 80px;
 }
 
+body.mode-book .chapter-header-wrap {
+  margin: 12px 0 18px 0;
+}
+
 .chapter-heading {
-  font-size: 1.48em;
+  font-size: 1.42em;
   font-weight: 700;
   color: var(--chapter);
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
   text-indent: 0;
   line-height: 1.35;
 }
@@ -698,7 +924,7 @@ body.spotlight-on .para:hover {
   align-items: center;
   gap: 10px;
   font-family: var(--font-sans);
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--text-sub);
 }
 
@@ -708,49 +934,38 @@ body.spotlight-on .para:hover {
   color: var(--text-muted);
   border-radius: 99px;
   padding: 3px 10px;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
 }
 
 .btn-del-chap-inline:hover {
   color: var(--danger);
   border-color: var(--danger);
-  background: rgba(248, 113, 113, 0.1);
 }
 
-/* ---------------- BOOK PAGINATION MODE ---------------- */
-body.mode-book .book-viewport {
-  min-height: calc(100dvh - 210px);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-/* Vùng chạm mép trái/phải để lật trang 1 tay trên iPhone */
+/* Vùng chạm mép trái/phải lật trang */
 .page-tap-zone {
-  position: fixed;
-  top: 70px;
-  bottom: 130px;
-  width: 16vw;
-  max-width: 90px;
-  z-index: 50;
+  position: absolute;
+  top: 38px;
+  bottom: 38px;
+  width: 17%;
+  z-index: 8;
   cursor: pointer;
 }
 .page-tap-zone.left { left: 0; }
 .page-tap-zone.right { right: 0; }
 
 .book-pager-bar {
-  margin-top: 18px;
+  margin-top: 14px;
   background: var(--bg-solid);
   border: 1px solid var(--border);
   border-radius: 18px;
-  padding: 10px 14px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   font-family: var(--font-sans);
   box-shadow: var(--shadow-lg);
 }
@@ -759,8 +974,8 @@ body.mode-book .book-viewport {
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text-main);
-  padding: 8px 14px;
-  border-radius: 12px;
+  padding: 7px 13px;
+  border-radius: 11px;
   font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
@@ -777,19 +992,29 @@ body.mode-book .book-viewport {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  gap: 3px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--text-muted);
 }
 
+/* Khung đo chiều cao ẩn để ngắt trang chính xác 100% */
+#pagination-measure-box {
+  position: fixed;
+  top: -9999px;
+  left: -9999px;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
 /* ---------------- THẺ HOÀN THÀNH CHƯƠNG ---------------- */
 .chapter-complete-card {
-  margin-top: 40px;
-  padding: 28px 20px;
+  margin-top: 28px;
+  padding: 24px 18px;
   background: var(--bg-solid);
   border: 1px solid var(--border);
-  border-radius: 24px;
+  border-radius: 22px;
   text-align: center;
   font-family: var(--font-sans);
   box-shadow: var(--shadow-lg);
@@ -798,55 +1023,49 @@ body.mode-book .book-viewport {
 .complete-ornament {
   color: var(--chapter);
   letter-spacing: 8px;
-  font-size: 14px;
-  margin-bottom: 8px;
+  font-size: 13px;
+  margin-bottom: 6px;
 }
 
 .complete-title {
-  margin: 0 0 8px;
-  font-size: 18px;
+  margin: 0 0 6px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--text-main);
 }
 
 .complete-subtitle {
-  margin: 0 auto 20px;
-  max-width: 460px;
-  font-size: 13.5px;
+  margin: 0 auto 16px;
+  max-width: 440px;
+  font-size: 13px;
   color: var(--text-muted);
-  line-height: 1.55;
+  line-height: 1.5;
 }
 
 .complete-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .complete-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 16px;
-  border-radius: 14px;
-  font-size: 13.5px;
+  gap: 7px;
+  padding: 11px 15px;
+  border-radius: 13px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   border: 1px solid var(--border);
-  transition: transform 0.15s ease;
-}
-
-.complete-btn:active {
-  transform: scale(0.96);
 }
 
 .complete-btn.primary-action {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
-  box-shadow: 0 6px 20px var(--accent-glow);
 }
 
 .complete-btn.fast-paste-action {
@@ -859,10 +1078,10 @@ body.mode-book .book-viewport {
   color: var(--text-main);
 }
 
-/* ---------------- FLOATING HUDS (AUTO SCROLL & TTS) ---------------- */
+/* ---------------- FLOATING HUDS & DOCK ---------------- */
 .floating-hud {
   position: fixed;
-  bottom: calc(env(safe-area-inset-bottom, 16px) + 84px);
+  bottom: calc(env(safe-area-inset-bottom, 16px) + 82px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 990;
@@ -909,10 +1128,9 @@ body.mode-book .book-viewport {
   cursor: pointer;
 }
 
-/* ---------------- BOTTOM FLOATING DOCK ---------------- */
 .floating-dock {
   position: fixed;
-  bottom: calc(env(safe-area-inset-bottom, 12px) + 10px);
+  bottom: calc(env(safe-area-inset-bottom, 10px) + 8px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 980;
@@ -921,10 +1139,10 @@ body.mode-book .book-viewport {
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border);
   border-radius: 22px;
-  padding: 6px 8px;
+  padding: 5px 8px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   box-shadow: var(--shadow-lg);
   transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s ease;
 }
@@ -935,8 +1153,8 @@ body.mode-book .book-viewport {
 }
 
 .dock-item {
-  min-width: 54px;
-  padding: 6px 8px;
+  min-width: 52px;
+  padding: 6px 7px;
   border-radius: 14px;
   border: none;
   background: transparent;
@@ -946,21 +1164,15 @@ body.mode-book .book-viewport {
   align-items: center;
   gap: 3px;
   font-family: var(--font-sans);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s ease;
 }
 
 .dock-item svg {
-  width: 19px;
-  height: 19px;
+  width: 18px;
+  height: 18px;
   stroke-width: 2;
-}
-
-.dock-item:hover {
-  color: var(--text-main);
-  background: var(--surface);
 }
 
 .dock-item.active {
@@ -1047,7 +1259,7 @@ body.mode-book .book-viewport {
 }
 
 .sheet-title {
-  font-size: 15.5px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-main);
 }
@@ -1099,7 +1311,6 @@ body.mode-book .book-viewport {
   color: var(--danger);
 }
 
-/* Swatch Theme Cards */
 .theme-swatch-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1133,7 +1344,6 @@ body.mode-book .book-viewport {
   flex-shrink: 0;
 }
 
-/* Custom Color Pickers */
 .custom-color-bar {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1204,7 +1414,6 @@ input[type=range]::-webkit-slider-thumb {
   cursor: pointer;
 }
 
-/* Segmented & Stepper Grids */
 .segmented-grid {
   display: grid;
   gap: 8px;
@@ -1223,7 +1432,7 @@ input[type=range]::-webkit-slider-thumb {
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text-main);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -1284,7 +1493,6 @@ input[type=range]::-webkit-slider-thumb {
   outline: none;
 }
 
-/* TOC & History Cards with Delete Button */
 .list-row-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1295,18 +1503,13 @@ input[type=range]::-webkit-slider-thumb {
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  transition: border-color 0.15s;
-}
-
-.list-row-card:hover {
-  border-color: var(--accent);
 }
 
 .list-row-info {
   flex: 1;
   min-width: 0;
   cursor: pointer;
-  font-size: 13.5px;
+  font-size: 13px;
   color: var(--text-main);
 }
 
@@ -1320,7 +1523,7 @@ input[type=range]::-webkit-slider-thumb {
 .list-row-info small {
   display: block;
   margin-top: 3px;
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--text-sub);
 }
 
@@ -1339,12 +1542,6 @@ input[type=range]::-webkit-slider-thumb {
   justify-content: center;
 }
 
-.row-del-btn:hover {
-  border-color: var(--danger);
-  background: rgba(248, 113, 113, 0.2);
-}
-
-/* Modal Dialog */
 .modal-dialog {
   position: fixed;
   top: 50%;
