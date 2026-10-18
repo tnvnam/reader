@@ -3,57 +3,103 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-  <title>Lumina Reader — Trình Đọc Truyện Cao Cấp</title>
+  <title>Lumina Reader Studio — Trình Đọc Truyện Cao Cấp</title>
   
-  <!-- Phông chữ tuyển chọn -->
+  <!-- Bộ phông chữ tuyển chọn -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,700;1,7..72,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-dark">
 
-  <!-- Vạch tiến trình đọc siêu mỏng đỉnh trang -->
+  <!-- Lớp phủ bảo vệ mắt ban đêm -->
+  <div id="eye-care-overlay"></div>
+
+  <!-- Vạch tiến trình đọc đỉnh trang -->
   <div id="progress-track"><div id="progress-fill"></div></div>
 
-  <!-- Thanh thông tin Sticky Meta Capsule -->
-  <div class="sticky-meta-wrap">
-    <div class="meta-capsule" id="metaCapsule">
-      <div class="meta-stat">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-        <span id="statWords">0 từ (~0 phút)</span>
+  <!-- Thông báo nổi kiểu Dynamic Island -->
+  <div id="toast-pill" class="toast-pill">Đã lưu</div>
+
+  <!-- ---------------- TOP ZEN HEADER ---------------- -->
+  <header class="zen-header" id="zenHeader">
+    <div class="zen-header-inner">
+      <div class="header-left">
+        <button type="button" class="icon-pill-btn" id="btnOpenNav" title="Mục lục & Quản lý chương">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <div class="header-title-wrap">
+          <span class="app-brand" id="headerTitle">Lumina Studio</span>
+          <span class="reading-meta" id="statWords">Chưa nạp chương</span>
+        </div>
       </div>
-      <div class="meta-actions">
-        <button class="capsule-btn" id="btnQuickNewChap" title="Tắt chương & Mở ô trống mới">+ Chương mới</button>
-        <div class="meta-badge" id="statPercent">0%</div>
+
+      <div class="header-right">
+        <button type="button" class="action-pill-btn pin-jump hidden" id="btnJumpBookmark" title="Nhảy tới từ đang ghim">
+          📌 Tới ghim
+        </button>
+        <button type="button" class="action-pill-btn mode-toggle" id="btnQuickReadMode" title="Đổi chế độ Cuộn dọc / Lật sách">
+          ↕️ Cuộn
+        </button>
+        <button type="button" class="icon-pill-btn" id="btnToggleSearch" title="Tìm kiếm trong truyện">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+        <button type="button" class="action-pill-btn accent" id="btnHeaderNewChap" title="Tắt chương & Mở ô trống">
+          + Chương mới
+        </button>
+        <div class="progress-pill" id="statPercent">0%</div>
       </div>
     </div>
-  </div>
 
-  <!-- Curtain làm mờ nền khi mở Sidebar / Modal -->
-  <div class="backdrop-curtain" id="curtain"></div>
+    <!-- Thanh tìm kiếm trong chương -->
+    <div class="search-bar-panel hidden" id="searchPanel">
+      <div class="search-input-wrap">
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Tìm từ khóa..." 
+          spellcheck="false" 
+          autocorrect="off" 
+          autocapitalize="off"
+        >
+        <button type="button" class="clear-inline-btn" id="btnClearSearch" title="Xoá nhanh">✕</button>
+      </div>
+      <span class="search-count" id="searchCount">0/0</span>
+      <button type="button" class="mini-nav-btn" id="btnSearchPrev">↑</button>
+      <button type="button" class="mini-nav-btn" id="btnSearchNext">↓</button>
+      <button type="button" class="mini-nav-btn" id="btnCloseSearch">Đóng</button>
+    </div>
+  </header>
 
-  <!-- Container Đọc Văn Bản -->
-  <div class="container">
-    <!-- Khung dán & Nạp tệp (Tối ưu chống lag iOS) -->
-    <div class="input-sheet" id="inputSheet">
-      <div class="input-toolbar">
-        <div class="input-mode-badge" id="inputModeBadge">Chế độ: Thay chương mới</div>
-        <div class="input-actions">
-          <button type="button" class="chip-btn" id="btnPasteClipboard" title="Dán nhanh từ bộ nhớ tạm">
-            📋 Dán nhanh
+  <!-- ---------------- MAIN WORKSPACE ---------------- -->
+  <main class="reader-container" id="readerContainer">
+
+    <!-- KHUNG SOẠN THẢO / CHÈN CHƯƠNG (Chống lag 0ms trên iPhone) -->
+    <section class="composer-card" id="inputSheet">
+      <div class="composer-header">
+        <div class="composer-title-group">
+          <span class="composer-badge" id="inputModeBadge">📖 Chèn chương mới</span>
+          <span class="composer-live-count" id="composerWordCount">0 từ</span>
+        </div>
+        <div class="composer-toolbar">
+          <button type="button" class="tool-btn paste" id="btnPasteClipboard" title="Dán thẳng từ bộ nhớ tạm và đọc ngay">
+            📋 Dán & Đọc ngay
           </button>
-          <button type="button" class="chip-btn danger" id="btnClearMainText" title="Xoá trắng ô nhập ngay lập tức">
+          <button type="button" class="tool-btn clear" id="btnClearMainText" title="Xoá sạch ô chữ ngay lập tức">
             🗑️ Xoá hết
+          </button>
+          <button type="button" class="tool-btn close-sheet hidden" id="btnCancelComposer" title="Đóng khung nhập">
+            ✕
           </button>
         </div>
       </div>
 
-      <div class="textarea-wrapper">
+      <div class="textarea-shell">
         <textarea 
           id="textInput" 
-          placeholder="Dán văn bản truyện, chương hồi vào đây..."
+          placeholder="Dán nội dung chương truyện vào đây, hoặc bấm '📋 Dán & Đọc ngay' ở góc trên..."
           spellcheck="false"
           autocorrect="off"
           autocapitalize="off"
@@ -61,212 +107,310 @@
         ></textarea>
       </div>
 
-      <div class="input-footer-bar">
-        <div class="drop-trigger" id="dropArea">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-          <span>Nạp tệp .txt</span>
+      <div class="composer-footer">
+        <div class="file-drop-zone" id="dropArea">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          <span>Nạp file .txt</span>
         </div>
-        <button type="button" class="primary-read-btn" id="btnStartRead">
-          📖 Bắt đầu đọc
+        <button type="button" class="btn-primary-launch" id="btnStartRead">
+          Bắt đầu đọc →
         </button>
       </div>
       <input type="file" id="fileUpload" accept=".txt,text/plain" style="display: none;">
+    </section>
+
+    <!-- KHU VỰC ĐỌC TRUYỆN (Hỗ trợ cả Cuộn dọc & Lật sách) -->
+    <div id="book-viewport" class="book-viewport">
+      <!-- Vùng chạm lật trang nhanh bên trái/phải khi ở chế độ Lật sách -->
+      <div class="page-tap-zone left hidden" id="tapZoneLeft" title="Trang trước"></div>
+      <div class="page-tap-zone right hidden" id="tapZoneRight" title="Trang sau"></div>
+
+      <article id="reader-content"></article>
+
+      <!-- THẺ KẾT THÚC CHƯƠNG -->
+      <section class="chapter-complete-card hidden" id="chapterEndCard">
+        <div class="complete-ornament">✦ ✦ ✦</div>
+        <h3 class="complete-title">Đã đọc đến cuối chương</h3>
+        <p class="complete-subtitle" id="endCardSummary">Bạn có thể tắt chương hiện tại để mở ô trống chèn chương mới, hoặc nối tiếp chương sau vào bên dưới.</p>
+        
+        <div class="complete-actions">
+          <button type="button" class="complete-btn primary-action" id="btnFinishAndNew">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+            <span>Tắt chương & Mở ô trống mới</span>
+          </button>
+
+          <button type="button" class="complete-btn fast-paste-action" id="btnFinishAndPaste">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            <span>Tắt chương & Dán đọc luôn</span>
+          </button>
+
+          <button type="button" class="complete-btn secondary-action" id="btnAppendChapter">
+            <span>➕ Nối thêm chương vào dưới</span>
+          </button>
+        </div>
+      </section>
     </div>
 
-    <!-- Nội dung truyện đã xử lý -->
-    <div id="reader-content"></div>
-
-    <!-- Thẻ hành động cuối chương (Hiện khi có nội dung đang đọc) -->
-    <div class="chapter-end-card hidden" id="chapterEndCard">
-      <div class="end-card-icon">✨</div>
-      <div class="end-card-title">Bạn đã đọc đến cuối chương</div>
-      <div class="end-card-desc">Tắt chương hiện tại để giải phóng bộ nhớ và mở khung trống chèn chương tiếp theo, hoặc nối thêm chương vào bên dưới.</div>
-      <div class="end-card-actions">
-        <button type="button" class="end-btn primary" id="btnFinishAndNew">
-          🔄 Tắt chương & Chèn chương mới
-        </button>
-        <button type="button" class="end-btn secondary" id="btnAppendChapter">
-          ➕ Nối thêm chương vào dưới
-        </button>
+    <!-- THANH ĐIỀU KHIỂN LẬT TRANG SÁCH (Chỉ hiện khi bật chế độ Lật sách) -->
+    <div class="book-pager-bar hidden" id="bookPagerBar">
+      <button type="button" class="pager-btn" id="btnPrevPage">← Trang trước</button>
+      <div class="pager-center">
+        <span id="pagerInfo">Trang 1 / 1</span>
+        <input type="range" id="pageSlider" min="1" max="1" value="1">
       </div>
+      <button type="button" class="pager-btn" id="btnNextPage">Trang sau →</button>
     </div>
+
+  </main>
+
+  <!-- ---------------- HUD NỔI: CUỘN TỰ ĐỘNG & AUDIO TTS ---------------- -->
+  <div class="floating-hud hidden" id="autoScrollHud">
+    <span class="hud-label">Tự cuộn</span>
+    <button type="button" class="hud-step" id="btnSpeedDown">−</button>
+    <span class="hud-val" id="hudSpeedVal">3</span>
+    <button type="button" class="hud-step" id="btnSpeedUp">+</button>
+    <button type="button" class="hud-stop" id="btnStopScrollHud">Dừng</button>
   </div>
 
-  <!-- ---------------- DYNAMIC FLOATING ISLAND (DOCK ĐIỀU HƯỚNG) ---------------- -->
-  <nav class="floating-island" id="islandDock">
-    <button class="dock-btn" id="btnOpenNav" title="Mục lục & Lịch sử">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-    </button>
-    <button class="dock-btn" id="btnToggleInput" title="Mở khung nhập / Sửa văn bản">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-    </button>
-    <button class="dock-btn" id="btnNewBlankChap" title="Tắt chương & Mở ô trống chèn chương mới">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-    </button>
-    
-    <div class="dock-separator"></div>
+  <div class="floating-hud tts-hud hidden" id="ttsHud">
+    <button type="button" class="hud-step" id="btnTtsPrev" title="Câu trước">⏮</button>
+    <span class="hud-label" id="ttsStatusLabel">Đang đọc...</span>
+    <button type="button" class="hud-step" id="btnTtsNext" title="Câu tiếp">⏭</button>
+    <button type="button" class="hud-chip" id="btnTtsRate" title="Tốc độ giọng đọc">1.0x</button>
+    <button type="button" class="hud-chip" id="btnSleepTimer" title="Hẹn giờ tắt">🌙 Tắt hẹn giờ</button>
+    <button type="button" class="hud-stop" id="btnTtsStop">Dừng</button>
+  </div>
 
-    <button class="dock-btn" id="btnTTS" title="Nghe đọc Audio">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
+  <!-- ---------------- BOTTOM FLOATING DOCK ---------------- -->
+  <nav class="floating-dock" id="islandDock">
+    <button type="button" class="dock-item" id="btnDockInput" title="Mở khung nhập văn bản">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+      <span>Khung nhập</span>
     </button>
-    <button class="dock-btn" id="btnAutoScroll" title="Cuộn tự động rảnh tay (Phím Space)">
+
+    <button type="button" class="dock-item" id="btnNewBlankChap" title="Tắt chương & Mở ô trống">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+      <span>Chương mới</span>
+    </button>
+
+    <button type="button" class="dock-item" id="btnBookModeDock" title="Bật/Tắt chế độ Lật trang sách">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+      <span id="lblDockMode">Lật sách</span>
+    </button>
+
+    <button type="button" class="dock-item" id="btnAutoScroll" title="Cuộn tự động 60fps">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-    </button>
-    <button class="dock-btn" id="btnOpenOpts" title="Cài đặt giao diện & Công cụ">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      <span>Tự cuộn</span>
     </button>
 
-    <div class="dock-separator"></div>
-
-    <button class="dock-btn" id="btnScrollTop" title="Cuộn về đầu trang">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="18 15 12 9 6 15"></polyline></svg>
+    <button type="button" class="dock-item" id="btnTTS" title="Đọc giọng nói tiếng Việt">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
+      <span>Nghe</span>
     </button>
-    <button class="dock-btn" id="btnHelp" title="Hướng dẫn sử dụng">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+
+    <button type="button" class="dock-item" id="btnOpenOpts" title="Tùy chỉnh Giao diện, Màu sắc & Chữ">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 20h16"></path><path d="m6 16 6-12 6 12"></path><path d="M8 12h8"></path></svg>
+      <span>Giao diện</span>
     </button>
   </nav>
 
-  <!-- ---------------- DRAWER: MỤC LỤC & LỊCH SỬ ---------------- -->
-  <aside class="drawer" id="drawer-nav">
-    <div class="drawer-header">
-      <div class="drawer-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-        <span>Điều Hướng</span>
-      </div>
-      <button class="drawer-close" id="btnCloseNav">✕</button>
+  <!-- Lớp nền mờ khi mở Menu -->
+  <div class="backdrop-curtain" id="curtain"></div>
+
+  <!-- ---------------- DRAWER TRÁI: QUẢN LÝ CHƯƠNG & LỊCH SỬ ---------------- -->
+  <aside class="side-drawer" id="drawer-nav">
+    <div class="sheet-header">
+      <div class="sheet-title">📚 Quản Lý Chương & Lịch Sử</div>
+      <button type="button" class="sheet-close" id="btnCloseNav">✕</button>
     </div>
-    <div class="drawer-scroll-body">
-      <div class="section-label">Mục lục chương hiện tại</div>
-      <div id="tocContainer"></div>
-      
-      <div class="section-label-row" style="margin-top: 24px;">
-        <span class="section-label" style="margin:0;">Lịch sử các chương đã đọc</span>
-        <button type="button" class="mini-clear-btn" id="btnClearHistory">Xoá lịch sử</button>
+    <div class="sheet-body">
+      <div class="group-label-row" style="margin-top:4px;">
+        <span class="group-label" style="margin:0;">Các chương đang mở (Bấm 🗑️ để xoá)</span>
+        <button type="button" class="inline-action-btn" id="btnExportTxt" title="Tải về file .txt">⬇ Xuất .txt</button>
+      </div>
+      <div id="tocContainer" style="margin-top: 8px;"></div>
+
+      <div class="group-label-row" style="margin-top: 24px;">
+        <span class="group-label" style="margin:0;">Lịch sử đã lưu (Xoá từng mục hoặc tất cả)</span>
+        <button type="button" class="inline-danger-btn" id="btnClearHistory">Xoá hết</button>
       </div>
       <div id="historyContainer" style="margin-top: 8px;"></div>
     </div>
   </aside>
 
-  <!-- ---------------- DRAWER: TÙY CHỈNH & BỘ CÔNG CỤ ---------------- -->
-  <aside class="drawer" id="drawer-opts">
-    <div class="drawer-header">
-      <div class="drawer-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        <span>Tùy Chỉnh Đọc</span>
+  <!-- ---------------- BOTTOM SHEET: STUDIO TÙY CHỈNH GIAO DIỆN & CHỮ ---------------- -->
+  <aside class="studio-bottom-sheet" id="drawer-opts">
+    <div class="sheet-drag-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">🎨 Tùy Chỉnh Giao Diện & Trải Nghiệm</div>
+      <div style="display:flex; gap:8px;">
+        <button type="button" class="inline-action-btn" id="btnScrollTop">⬆ Đầu trang</button>
+        <button type="button" class="inline-action-btn" id="btnHelp">Hướng dẫn</button>
+        <button type="button" class="sheet-close" id="btnCloseOpts">✕</button>
       </div>
-      <button class="drawer-close" id="btnCloseOpts">✕</button>
     </div>
 
-    <div class="drawer-scroll-body">
-      <div class="section-label">Chủ đề màu sắc (Presets)</div>
-      <div class="option-grid">
-        <button class="opt-btn theme-btn" data-theme="theme-dark" onclick="applyTheme('theme-dark')">Obsidian Tối</button>
-        <button class="opt-btn theme-btn" data-theme="theme-sepia" onclick="applyTheme('theme-sepia')">Giấy Cổ Sepia</button>
-        <button class="opt-btn theme-btn" data-theme="theme-oled" onclick="applyTheme('theme-oled')">OLED Đen Tuyệt</button>
-        <button class="opt-btn theme-btn" data-theme="theme-forest" onclick="applyTheme('theme-forest')">Rừng Đêm</button>
-        <button class="opt-btn theme-btn" data-theme="theme-paper" onclick="applyTheme('theme-paper')">Giấy Sáng</button>
-        <button class="opt-btn theme-btn" data-theme="theme-nord" onclick="applyTheme('theme-nord')">Xanh Bắc Âu</button>
+    <div class="sheet-body">
+      <!-- 1. Kiểu đọc: Cuộn dọc vs Lật trang sách -->
+      <div class="group-label">Chế độ đọc & Hiệu ứng lật sách</div>
+      <div class="segmented-grid two-cols">
+        <button type="button" class="seg-btn active" id="btnModeScroll" onclick="setReadingMode('scroll')">↕️ Cuộn dọc truyền thống</button>
+        <button type="button" class="seg-btn" id="btnModeBook" onclick="setReadingMode('book')">📖 Lật trang sách (Book Flip)</button>
+      </div>
+      <div class="segmented-grid two-cols" style="margin-top:8px;">
+        <button type="button" class="seg-btn active" id="btnAnimSlide" onclick="setFlipAnimation('slide')">Hiệu ứng: Trượt mượt Kindle</button>
+        <button type="button" class="seg-btn" id="btnAnimCurl" onclick="setFlipAnimation('curl')">Hiệu ứng: Lật giấy 3D</button>
       </div>
 
-      <div class="section-label-row">
-        <span class="section-label" style="margin:0;">Tùy chỉnh màu nền & chữ</span>
-        <button type="button" class="mini-clear-btn" onclick="resetCustomColors()">Mặc định</button>
+      <!-- 2. Chủ đề màu có sẵn -->
+      <div class="group-label">Bảng màu chủ đề</div>
+      <div class="theme-swatch-grid">
+        <button type="button" class="swatch-card theme-btn" data-theme="theme-dark" onclick="applyTheme('theme-dark')">
+          <span class="swatch-dot" style="background:#0d0f14; border-color:#6366f1;"></span>
+          <span>Obsidian</span>
+        </button>
+        <button type="button" class="swatch-card theme-btn" data-theme="theme-oled" onclick="applyTheme('theme-oled')">
+          <span class="swatch-dot" style="background:#000000; border-color:#a855f7;"></span>
+          <span>OLED Đen</span>
+        </button>
+        <button type="button" class="swatch-card theme-btn" data-theme="theme-sepia" onclick="applyTheme('theme-sepia')">
+          <span class="swatch-dot" style="background:#f5ebe0; border-color:#b45309;"></span>
+          <span>Giấy Cổ</span>
+        </button>
+        <button type="button" class="swatch-card theme-btn" data-theme="theme-paper" onclick="applyTheme('theme-paper')">
+          <span class="swatch-dot" style="background:#ffffff; border-color:#2563eb;"></span>
+          <span>Kindle Sáng</span>
+        </button>
+        <button type="button" class="swatch-card theme-btn" data-theme="theme-forest" onclick="applyTheme('theme-forest')">
+          <span class="swatch-dot" style="background:#0a1612; border-color:#10b981;"></span>
+          <span>Rừng Đêm</span>
+        </button>
+        <button type="button" class="swatch-card theme-btn" data-theme="theme-rose" onclick="applyTheme('theme-rose')">
+          <span class="swatch-dot" style="background:#191724; border-color:#ebbcba;"></span>
+          <span>Rosé Pine</span>
+        </button>
       </div>
-      <div class="color-picker-grid">
-        <label class="color-item">
+
+      <!-- 3. Tự phối màu Nền & Chữ -->
+      <div class="group-label-row">
+        <span class="group-label" style="margin:0;">Tự chỉnh màu Nền & Chữ (Xem trực tiếp)</span>
+        <button type="button" class="inline-action-btn" onclick="resetCustomColors()">Khôi phục màu gốc</button>
+      </div>
+      <div class="custom-color-bar">
+        <label class="color-Well">
+          <input type="color" id="pickerBg" value="#0d0f14">
           <span>Màu nền</span>
-          <input type="color" id="pickerBg" value="#0d0f12">
         </label>
-        <label class="color-item">
+        <label class="color-Well">
+          <input type="color" id="pickerText" value="#e2e8f0">
           <span>Màu chữ</span>
-          <input type="color" id="pickerText" value="#f1f5f9">
         </label>
-        <label class="color-item">
-          <span>Hội thoại</span>
-          <input type="color" id="pickerDialogue" value="#fbbf24">
+        <label class="color-Well">
+          <input type="color" id="pickerDialogue" value="#fcd34d">
+          <span>Lời thoại</span>
+        </label>
+        <label class="color-Well">
+          <input type="color" id="pickerChapter" value="#f59e0b">
+          <span>Tiêu đề</span>
         </label>
       </div>
-      <button class="opt-btn" style="width: 100%; margin-bottom: 12px;" id="btnAltParaColor" onclick="toggleAltParaColor()">
-        🎨 Đổi màu đoạn chẵn/lẻ: Bật
-      </button>
 
-      <div class="section-label">Phông chữ</div>
-      <div class="option-grid">
-        <button class="opt-btn font-btn" id="btnFontSans" onclick="applyFont('sans')">Be Vietnam</button>
-        <button class="opt-btn font-btn" id="btnFontSerif" onclick="applyFont('serif')">Merriweather</button>
-        <button class="opt-btn font-btn" id="btnFontLora" onclick="applyFont('lora')">Lora</button>
-        <button class="opt-btn font-btn" id="btnFontLiterata" onclick="applyFont('literata')">Literata</button>
+      <!-- 4. Bảo vệ mắt ban đêm -->
+      <div class="slider-control-box">
+        <div class="slider-head">
+          <span>🌙 Độ ấm bảo vệ mắt ban đêm (Ánh vàng)</span>
+          <strong id="warmthValLabel">0%</strong>
+        </div>
+        <input type="range" id="warmthSlider" min="0" max="60" value="0">
       </div>
 
-      <div class="section-label">Kích thước chữ & Giãn dòng</div>
-      <div class="option-grid">
-        <button class="opt-btn" onclick="stepFontSize(-1)">Cỡ chữ A -</button>
-        <button class="opt-btn" onclick="stepFontSize(1)">Cỡ chữ A +</button>
-      </div>
-      <div class="option-grid">
-        <button class="opt-btn" onclick="stepLineHeight(-0.1)">Giãn dòng -</button>
-        <button class="opt-btn" onclick="stepLineHeight(0.1)">Giãn dòng +</button>
-      </div>
-
-      <div class="section-label">Bố cục & Chế độ đọc</div>
-      <div class="option-grid">
-        <button class="opt-btn" id="btnAlign" onclick="toggleTextAlign()">Căn lề: Đều 2 bên</button>
-        <button class="opt-btn" id="btnTwoCols" onclick="toggleTwoCols()">2 Cột: Tắt</button>
-      </div>
-      <div class="option-grid">
-        <button class="opt-btn" id="btnBionic" onclick="toggleBionic()">Bionic: Tắt</button>
-        <button class="opt-btn" id="btnSpotlight" onclick="toggleSpotlight()">💡 Đèn Rọi: Tắt</button>
+      <!-- 5. Phông chữ & Kích cỡ -->
+      <div class="group-label">Phông chữ đọc truyện</div>
+      <div class="segmented-grid four-cols">
+        <button type="button" class="seg-btn" id="btnFontSans" onclick="applyFont('sans')">Be Vietnam</button>
+        <button type="button" class="seg-btn" id="btnFontLiterata" onclick="applyFont('literata')">Literata</button>
+        <button type="button" class="seg-btn" id="btnFontLora" onclick="applyFont('lora')">Lora</button>
+        <button type="button" class="seg-btn" id="btnFontSerif" onclick="applyFont('serif')">Merriweather</button>
       </div>
 
-      <div class="section-label">Khổ rộng trang đọc</div>
-      <div class="option-grid three-col">
-        <button class="opt-btn" onclick="applyWidth('680px')">Hẹp</button>
-        <button class="opt-btn" onclick="applyWidth('780px')">Vừa</button>
-        <button class="opt-btn" onclick="applyWidth('1040px')">Rộng</button>
+      <div class="group-label">Cỡ chữ, Giãn dòng & Khoảng cách đoạn</div>
+      <div class="stepper-grid">
+        <div class="stepper-box">
+          <span class="stepper-title">Cỡ chữ (<b id="lblFontSize">20px</b>)</span>
+          <div class="stepper-btns">
+            <button type="button" onclick="stepFontSize(-1)">A−</button>
+            <button type="button" onclick="stepFontSize(1)">A+</button>
+          </div>
+        </div>
+        <div class="stepper-box">
+          <span class="stepper-title">Giãn dòng (<b id="lblLineHeight">1.9</b>)</span>
+          <div class="stepper-btns">
+            <button type="button" onclick="stepLineHeight(-0.1)">Thu</button>
+            <button type="button" onclick="stepLineHeight(0.1)">Giãn</button>
+          </div>
+        </div>
+        <div class="stepper-box">
+          <span class="stepper-title">Cách đoạn (<b id="lblParaGap">1.2em</b>)</span>
+          <div class="stepper-btns">
+            <button type="button" onclick="stepParaGap(-0.2)">Sát</button>
+            <button type="button" onclick="stepParaGap(0.2)">Thưa</button>
+          </div>
+        </div>
       </div>
 
-      <div class="section-label-row">
-        <span class="section-label" style="margin:0;">Đổi tên / Từ vựng (Cũ = Mới)</span>
-        <button type="button" class="mini-clear-btn" id="btnClearReplace">🗑️ Xoá ô này</button>
+      <!-- 6. Bố cục & Công cụ đọc nâng cao -->
+      <div class="group-label">Trải nghiệm trình bày</div>
+      <div class="segmented-grid two-cols">
+        <button type="button" class="seg-btn" id="btnAlign" onclick="toggleTextAlign()">Căn lề: Đều 2 bên</button>
+        <button type="button" class="seg-btn" id="btnDropCap" onclick="toggleDropCap()">Chữ hoa đầu chương: Bật</button>
+        <button type="button" class="seg-btn" id="btnBionic" onclick="toggleBionic()">Bionic Reading: Tắt</button>
+        <button type="button" class="seg-btn" id="btnSpotlight" onclick="toggleSpotlight()">💡 Đèn rọi tập trung: Tắt</button>
+        <button type="button" class="seg-btn" id="btnTwoCols" onclick="toggleTwoCols()">Chia 2 cột (iPad/PC): Tắt</button>
+        <button type="button" class="seg-btn" id="btnUnbreak" onclick="toggleUnbreak()">Vá dòng bị gãy: Tắt</button>
+      </div>
+
+      <div class="group-label">Khổ rộng vùng đọc</div>
+      <div class="segmented-grid three-cols">
+        <button type="button" class="seg-btn" onclick="applyWidth('660px')">Hẹp (Tập trung)</button>
+        <button type="button" class="seg-btn" onclick="applyWidth('780px')">Tiêu chuẩn</button>
+        <button type="button" class="seg-btn" onclick="applyWidth('1020px')">Rộng</button>
+      </div>
+
+      <!-- 7. Thay thế tên nhân vật / thuật ngữ -->
+      <div class="group-label-row">
+        <span class="group-label" style="margin:0;">Từ điển đổi tên (Từ cũ = Từ mới)</span>
+        <button type="button" class="inline-danger-btn" id="btnClearReplace">🗑️ Xoá sạch ô này</button>
       </div>
       <textarea 
         id="replaceInput" 
-        style="height: 76px; font-size: 13.5px; margin-top: 6px;" 
+        class="compact-textarea"
         placeholder="hắn ta = anh&#10;tiểu tử = cậu ấy"
         spellcheck="false"
         autocorrect="off"
         autocapitalize="off"
       ></textarea>
-      <div class="option-grid" style="margin-top: 8px;">
-        <button class="opt-btn" id="btnUnbreak" onclick="toggleUnbreak()">Vá ngắt dòng: Tắt</button>
-        <button class="opt-btn active" onclick="commitReplacements()">Áp dụng ngay</button>
-      </div>
-
-      <div class="section-label">Tốc độ cuộn rảnh tay (Phím Space)</div>
-      <input type="range" id="scrollSpeedSlider" min="1" max="10" value="2">
+      <button type="button" class="seg-btn active" style="width:100%; margin-top:8px;" onclick="commitReplacements()">
+        Áp dụng bảng đổi từ ngay
+      </button>
     </div>
   </aside>
 
-  <!-- ---------------- MODAL HƯỚNG DẪN THAO TÁC ---------------- -->
-  <div class="modal-sheet" id="modalGuide">
-    <div class="drawer-header" style="border:none; margin-bottom: 8px;">
-      <div class="drawer-title">📖 Hướng Dẫn Sử Dụng Lumina Reader</div>
-      <button class="drawer-close" id="btnCloseGuide">✕</button>
+  <!-- ---------------- MODAL HƯỚNG DẪN ---------------- -->
+  <div class="modal-dialog" id="modalGuide">
+    <div class="sheet-header">
+      <div class="sheet-title">✨ Mẹo Sử Dụng Lumina Studio</div>
+      <button type="button" class="sheet-close" id="btnCloseGuide">✕</button>
     </div>
-    <div class="modal-body">
-      <p><strong>1. Tối ưu chống lag trên iPhone / Mobile:</strong><br>
-      Sử dụng nút <span class="guide-chip">🗑️ Xoá hết</span> hoặc <span class="guide-chip">📋 Dán nhanh</span> phía trên ô nhập để xóa hoặc chèn văn bản dài trong 0 giây mà không cần bôi đen toàn bộ gây đơ máy.</p>
+    <div class="sheet-body" style="font-size:14px; line-height:1.65; color:var(--text-muted);">
+      <p><strong>1. Chế độ Lật trang sách (Book Flip):</strong><br>
+      • Bấm nút <strong>Lật sách</strong> dưới thanh Dock hoặc nút <strong>↕️ Cuộn / 📖 Sách</strong> trên thanh đỉnh trang để chuyển đổi.<br>
+      • Khi ở chế độ Lật sách: Vuốt trái/phải trên màn hình iPhone, chạm vào mép trái/phải của trang, hoặc dùng phím mũi tên <code>←</code> / <code>→</code> để sang trang.</p>
 
-      <p><strong>2. Chuyển & Thêm chương mới:</strong><br>
-      Khi đọc xuống cuối trang, bấm <strong>"Tắt chương & Chèn chương mới"</strong> để đóng chương cũ và mở sẵn ô trống dán chương mới, hoặc bấm <strong>"Nối thêm chương"</strong> để ghép tiếp vào bên dưới.</p>
-
-      <p><strong>3. Đánh dấu vị trí đọc (Ghim thông minh):</strong><br>
-      Chạm vào bất kỳ từ nào để đặt ghim <span class="guide-chip">📌</span> ngay sau từ đó. Chạm lại vào đoạn đang ghim để bỏ ghim.</p>
+      <p><strong>2. Xoá từng chương cụ thể:</strong><br>
+      • Bấm nút <strong>🗑️ Xoá chương này</strong> ngay dưới tiêu đề mỗi chương khi đang đọc, hoặc mở <strong>Mục lục (☰)</strong> để xoá bất kỳ chương nào trong danh sách và trong Lịch sử.</p>
       
-      <p><strong>4. Phím tắt tiện lợi (PC/Mac):</strong><br>
-      • <span class="guide-chip">Space</span> : Bật/tắt tự động cuộn rảnh tay.<br>
-      • <span class="guide-chip">J</span> / <span class="guide-chip">K</span> : Nhảy tới đoạn tiếp theo / đoạn trước.<br>
-      • <span class="guide-chip">F</span> : Bật/thoát toàn màn hình.</p>
+      <p><strong>3. Ghim từ không xô lệch chữ trên iPhone (📌):</strong><br>
+      • Chạm vào từ bất kỳ để tô sáng và neo biểu tượng 📌 lơ lửng phía trên từ đó (không làm giãn dòng hay mất chữ trên iOS). Bấm <strong>"📌 Tới ghim"</strong> để quay lại đúng trang và vị trí đang đọc dở.</p>
     </div>
   </div>
 
